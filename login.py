@@ -3,6 +3,7 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QColor, QPalette, QFont
 from signup import SignUpPage
+from dashboard import MainWindow
 
 class LoginPage(QWidget):
     def __init__(self):
@@ -121,11 +122,12 @@ class LoginPage(QWidget):
         if not username or not password:
             self.show_error_message("Please enter both username and password.")
             return
-
+        
         # For simplicity, use hardcoded username/password checks
         if user_type == "Citizen":
             if username == "citizen1" and password == "password123":
                 self.show_success_message("Citizen login successful!")
+                self.login()
             else:
                 self.show_error_message("Invalid credentials for Citizen.")
         
@@ -140,7 +142,12 @@ class LoginPage(QWidget):
                 self.show_success_message("Service Provider login successful!")
             else:
                 self.show_error_message("Invalid credentials for Service Provider.")
-        
+
+    def login(self):
+        self.dashboard = MainWindow()
+        self.dashboard.show()
+        self.close()
+
     def show_error_message(self, message):
         msg = QMessageBox()
         msg.setIcon(QMessageBox.Critical)

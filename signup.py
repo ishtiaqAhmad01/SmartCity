@@ -2,8 +2,7 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import *
 from database import *
-from checks import validate_email
-import sys
+from functions import validate_email
 
 class SignUpPage(QWidget):
     def __init__(self):
