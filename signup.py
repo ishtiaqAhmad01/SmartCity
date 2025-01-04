@@ -2,7 +2,7 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import *
 from database import *
-from functions import validate_email
+from functions import *
 
 class SignUpPage(QWidget):
     def __init__(self):
@@ -41,13 +41,10 @@ class SignUpPage(QWidget):
         title_label.setAlignment(Qt.AlignCenter)
         main_layout.addWidget(title_label)
 
-        # Create form layout for input fields
+
         form_layout = QGridLayout()
 
-        # Add input fields (similar to your original code)
-
         
-        # first row (2 fields)
         self.first_name_input = QLineEdit()
         self.first_name_input.setPlaceholderText("Enter First Name")
         self.first_name_input.setStyleSheet(self.input_style())
@@ -60,7 +57,6 @@ class SignUpPage(QWidget):
         form_layout.addWidget(QLabel("Last Name:"), 0, 2)
         form_layout.addWidget(self.last_name_input, 0, 3)
 
-        # Second row (2 fields)
         self.phone_input = QLineEdit()
         self.phone_input.setPlaceholderText("Enter Phone")
         self.phone_input.setStyleSheet(self.input_style())
@@ -73,7 +69,6 @@ class SignUpPage(QWidget):
         form_layout.addWidget(QLabel("Email:"), 1, 2)
         form_layout.addWidget(self.email_input, 1, 3)
 
-        # Third row (2 fields)
         self.cnic_input = QLineEdit()
         self.cnic_input.setPlaceholderText("Enter CNIC")
         self.cnic_input.setStyleSheet(self.input_style())
@@ -86,7 +81,6 @@ class SignUpPage(QWidget):
         form_layout.addWidget(QLabel("Nationality:"), 2, 2)
         form_layout.addWidget(self.nationality_input, 2, 3)
 
-        # Fourth row (2 fields)
         self.dob_input = QLineEdit()
         self.dob_input.setPlaceholderText("Enter Date of Birth (dd/mm/yyyy)")
         self.dob_input.setStyleSheet(self.input_style())
@@ -99,7 +93,6 @@ class SignUpPage(QWidget):
         form_layout.addWidget(QLabel("Gender:"), 3, 2)
         form_layout.addWidget(self.gender_combo, 3, 3)
 
-        # Fifth row (2 fields)
         self.password_input = QLineEdit()
         self.password_input.setPlaceholderText("Enter Password")
         self.password_input.setEchoMode(QLineEdit.Password)
@@ -114,32 +107,46 @@ class SignUpPage(QWidget):
         form_layout.addWidget(QLabel("Confirm Password:"), 4, 2)
         form_layout.addWidget(self.confirm_password_input, 4, 3)
 
-        # Picture selector (in the 3rd column, span 2 rows)
         self.create_picture_selector(form_layout)
 
-        # Last row (Address field)
-        self.address_input = QLineEdit()
-        self.address_input.setPlaceholderText("Enter Address")
-        self.address_input.setStyleSheet(self.input_style())
-        form_layout.addWidget(QLabel("Address:"), 5, 0)
-        form_layout.addWidget(self.address_input, 5, 1, 1, 3)  # Span across columns
+        province_layout = QHBoxLayout()
 
-        # For brevity, the fields are not repeated here
+        province_layout.addWidget(QLabel("Address:"))
+        self.province_combo = QComboBox()
+        self.province_combo.addItems(pakistan_provinces())
+        self.province_combo.currentTextChanged.connect(self.update_districts)
+        self.province_combo.setStyleSheet(self.input_style())
+        province_layout.addWidget(self.province_combo)
 
-        # Sign Up Button
+        self.district_combo = QComboBox()
+        self.district_combo.addItems(provinces_districts(self.province_combo.currentText()))
+        self.district_combo.currentTextChanged.connect(self.update_tehsils)
+        self.district_combo.setStyleSheet(self.input_style())
+        province_layout.addWidget(self.district_combo)
+
+        self.tehsil_combo = QComboBox()
+        self.tehsil_combo.addItems(district_tehsils(self.district_combo.currentText()))
+        self.district_combo.currentTextChanged.connect(self.update_tehsils)
+        self.tehsil_combo.addItems(district_tehsils(self.district_combo.currentText()))
+        self.tehsil_combo.setStyleSheet(self.input_style())
+        province_layout.addWidget(self.tehsil_combo)
+
+        province_layout.addWidget(QLabel("")) # Empty label for spacing
+        form_layout.addLayout(province_layout, 5, 0, 1, 6) 
+
+
         self.sign_up_button = QPushButton("Sign Up")
         self.sign_up_button.setStyleSheet(self.button_style())
         self.sign_up_button.clicked.connect(self.submit_signup)
 
         form_layout.addWidget(self.sign_up_button, 6, 2, 1, 1)
 
-        # Add login button
         self.sign_in_button = QPushButton("Already have an account? Log In")
         self.sign_in_button.setStyleSheet(self.button_style())
         self.sign_in_button.clicked.connect(self.go_to_login)
 
         form_layout.addWidget(self.sign_in_button, 7, 2, 2, 1)
-
+        
         main_layout.addLayout(form_layout)
         self.setLayout(main_layout)
 
@@ -160,8 +167,23 @@ class SignUpPage(QWidget):
             padding: 15px;
             font-size: 16px;
             font-weight: bold;
+            margin-top: 30px;
             transition: background-color 0.3s ease;
         """
+    def update_tehsils(self):
+        self.tehsil_combo.clear()
+        self.tehsil_combo.addItems(district_tehsils(self.district_combo.currentText()))
+
+    def update_tehsils(self):
+        self.tehsil_combo.clear()
+        self.tehsil_combo.addItems(district_tehsils(self.district_combo.currentText()))
+
+    def submit_signup(self):
+        pass
+
+    def update_districts(self):
+        self.district_combo.clear()
+        self.district_combo.addItems(provinces_districts(self.province_combo.currentText()))
 
     def submit_signup(self):
         first_name = self.first_name_input.text()
@@ -174,7 +196,9 @@ class SignUpPage(QWidget):
         gender = self.gender_combo.currentText()
         password = self.password_input.text()
         confirm_password = self.confirm_password_input.text()
-        address = self.address_input.text()
+        province = self.province_combo.currentText()
+        district = self.district_combo.currentText()
+        tehsil = self.tehsil_combo.currentText()
 
 
         if not first_name or not last_name or not phone or not email or not cnic:
@@ -217,17 +241,14 @@ class SignUpPage(QWidget):
         pass
 
     def create_picture_selector(self, layout):
-        # Picture Selector Layout
         picture_layout = QVBoxLayout()
 
-        # QLabel to display the selected picture
         self.picture_label = QLabel("No Image Selected")
         self.picture_label.setStyleSheet("color: white; font-size: 16px;")
         self.picture_label.setAlignment(Qt.AlignCenter)
         self.picture_label.setFixedSize(200, 200)
         self.picture_label.setStyleSheet("border: 2px dashed #FFFFFF;")
 
-        # QPushButton to open the file dialog
         select_button = QPushButton("Select Picture")
         select_button.setStyleSheet(self.button_style())
         select_button.clicked.connect(self.select_picture)
@@ -235,16 +256,14 @@ class SignUpPage(QWidget):
         picture_layout.addWidget(self.picture_label, alignment=Qt.AlignCenter)
         picture_layout.addWidget(select_button, alignment=Qt.AlignCenter)
 
-        # Add the picture layout to the 3rd column (cell 0, 4)
-        layout.addLayout(picture_layout, 0, 4, 5, 1)  # Span across 5 rows in 3rd column
+        layout.addLayout(picture_layout, 0, 4, 5, 1)  
 
     def select_picture(self):
-        # Open file dialog to select an image
         file_path, _ = QFileDialog.getOpenFileName(self, "Select Picture", "", "Images (*.png *.jpg *.jpeg *.bmp)")
         if file_path:
             pixmap = QPixmap(file_path)
             self.picture_label.setPixmap(pixmap.scaled(self.picture_label.size(), Qt.KeepAspectRatio))
-            self.picture_label.setText("")  # Clear the text once an image is selected
+            self.picture_label.setText("")  
         
     def go_to_login(self):
         self.close()
@@ -252,3 +271,8 @@ class SignUpPage(QWidget):
         self.login_page = LoginPage()
         self.login_page.show()
 
+if __name__ == '__main__':
+    app = QApplication([])
+    window = SignUpPage()
+    window.show()
+    app.exec_()
