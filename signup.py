@@ -170,6 +170,7 @@ class SignUpPage(QWidget):
             margin-top: 30px;
             transition: background-color 0.3s ease;
         """
+    
     def update_tehsils(self):
         self.tehsil_combo.clear()
         self.tehsil_combo.addItems(district_tehsils(self.district_combo.currentText()))

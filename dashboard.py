@@ -1,6 +1,9 @@
 import sys
 from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QLabel, QStackedWidget
 from PyQt5.QtCore import Qt
+from PyQt5.QtGui import QPixmap, QFont
+from PyQt5.QtWidgets import QVBoxLayout, QHBoxLayout, QFrame
+from page1 import Page1
 
 class MainWindow(QWidget):
     def __init__(self):
@@ -20,12 +23,8 @@ class MainWindow(QWidget):
         self.content_area = QStackedWidget()
         self.content_area.setStyleSheet("background-color: #34495E; border-radius: 10px;")
 
-        # Add placeholder pages to the content area
-        for i in range(1, 8):
-            placeholder = QLabel(f"Content for Page {i}")
-            placeholder.setAlignment(Qt.AlignCenter)
-            placeholder.setStyleSheet("color: white; font-size: 20px;")
-            self.content_area.addWidget(placeholder)
+        # Add customized Page 1 and placeholders for other pages
+        self.add_pages()
 
         main_layout.addWidget(self.content_area, 4)
         self.setLayout(main_layout)
@@ -60,12 +59,18 @@ class MainWindow(QWidget):
             }
         """
 
+    def add_pages(self):
+        page1 = Page1()
+        self.content_area.addWidget(page1)
+
+
     def show_content(self, page):
         """
         Switch to the specified page in the content area.
         :param page: The index of the page to show (1-7).
         """
         self.content_area.setCurrentIndex(page - 1)
+
 
 # Main entry point
 if __name__ == '__main__':

@@ -5,51 +5,27 @@ connection = pymysql.connect(
     host="localhost",
     user="root",
     password="5533",
-    database="project"
+    database="ucsp"
 )
 
-def insert():
-    try:
-        cursor = connection.cursor()
-
-        # Read the image file in binary mode
-        image_path = "mueez.jpg"
-        with open(image_path, "rb") as file:
-            binary_data = file.read()
-
-        # Insert the image into the table
-        query = "INSERT INTO user_images (user_name, image_data) VALUES (%s, %s)"
-        data = ("John Doe", binary_data)
-        cursor.execute(query, data)
-
-        # Commit the transaction
-        connection.commit()
-        print("Image inserted successfully!")
-
-    finally:
-        # Close the connection
-        connection.close()
 
 
 
-def retrive():
-    try:
-        cursor = connection.cursor()
 
-        # Retrieve the image data
-        query = "SELECT user_name, image_data FROM user_images WHERE id = %s"
-        cursor.execute(query, (1,))  # Replace 1 with the ID of the desired record
-        result = cursor.fetchone()
-        user_name, image_data = result
+def show_tables():
+    cursor = connection.cursor()
+    cursor.execute("SHOW TABLES")
+    tables = cursor.fetchall()
+    cursor.close()
+    return tables
 
-        # show image
-        print(user_name)
-        print(image_data)
-
-    finally:
-        # Close the connection
-        connection.close()
+def get_users():
+    cursor = connection.cursor()
+    cursor.execute("SELECT * FROM users")
+    users = cursor.fetchall()
+    cursor.close()
+    return users
 
 
-if __name__ == '__main__':
-    retrive()
+if __name__ == "__main__":
+    print(show_tables())

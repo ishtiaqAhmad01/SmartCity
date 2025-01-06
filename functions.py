@@ -7,7 +7,6 @@ def validate_email(email):
         return True
     return False
 
-
 def pakistan_provinces():
     return ['Punjab', 'Sindh', 'Balochistan', 'Khyber Pakhtunkhwa', 'Gilgit-Baltistan', 'Azad Jammu and Kashmir']
 
@@ -98,3 +97,23 @@ def district_tehsils(district):
     "Astore": ["Astore City", "Diamer", "Gilgit", "Skardu"]
     }
     return district_to_tehsils.get(district, [])
+
+def doc_as_binary(image_path):
+    try:
+        with open(image_path, 'rb') as file:
+            return file.read()
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        return None
+
+def binary_as_doc(binary_data, output_path):
+    try:
+        with open(output_path, 'wb') as file:
+            file.write(binary_data)
+        print(f"File written successfully to {output_path}")
+    except Exception as e:
+        print(f"An error occurred: {e}")
+
+if __name__ == "__main__":
+    binary = doc_as_binary("faty.mp4")
+    binary_as_doc(binary, "faty_copy.mp4")
