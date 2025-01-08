@@ -2,7 +2,8 @@ import sys
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QColor, QPalette, QFont
-from signup import SignUpPage
+from user_signup import User_SignUpPage
+from admin_signup import Admin_SignUpPage
 from dashboard import MainWindow
 
 class LoginPage(QWidget):
@@ -47,10 +48,10 @@ class LoginPage(QWidget):
         form_layout = QVBoxLayout()
         
         # Username field
-        username_label = QLabel("Username:")
+        username_label = QLabel("Cnic:")
         username_label.setStyleSheet("color: white; font-size: 14px;")
         self.username_input = QLineEdit()
-        self.username_input.setPlaceholderText("Enter your username")
+        self.username_input.setPlaceholderText("Enter your Cnic")
         self.username_input.setStyleSheet(self.input_style())
         
         # Password field
@@ -65,7 +66,7 @@ class LoginPage(QWidget):
         user_type_label = QLabel("Select User Type:")
         user_type_label.setStyleSheet("color: white; font-size: 14px;")
         self.user_type_combo = QComboBox()
-        self.user_type_combo.addItems(["Citizen", "Admin", "Service Provider"])
+        self.user_type_combo.addItems(["Citizen", "Admin"])
         self.user_type_combo.setStyleSheet(self.input_style())
 
         # Login Button
@@ -122,26 +123,19 @@ class LoginPage(QWidget):
         if not username or not password:
             self.show_error_message("Please enter both username and password.")
             return
-        
-        # For simplicity, use hardcoded username/password checks
-        if user_type == "Citizen":
-            if username == "citizen1" and password == "password123":
-                self.show_success_message("Citizen login successful!")
-                self.login()
-            else:
-                self.show_error_message("Invalid credentials for Citizen.")
-        
-        elif user_type == "Admin":
-            if username == "admin1" and password == "adminpass":
-                self.show_success_message("Admin login successful!")
-            else:
-                self.show_error_message("Invalid credentials for Admin.")
-        
-        elif user_type == "Service Provider":
-            if username == "provider1" and password == "providerpass":
-                self.show_success_message("Service Provider login successful!")
-            else:
-                self.show_error_message("Invalid credentials for Service Provider.")
+
+        if user_type == 'Citizen':
+            self.varify_citizen(username, password)
+        else:
+            self.varify_admin(username, password)
+
+
+    def varify_citizen(self, username, password):
+        pass
+
+    def varify_admin(self, username, password):
+        pass
+
 
     def login(self):
         self.dashboard = MainWindow()
@@ -165,6 +159,27 @@ class LoginPage(QWidget):
         msg.exec_()
     
     def go_to_signup(self):
-        self.signup_page = SignUpPage()
+        # Create a custom QMessageBox
+        message_box = QMessageBox(self)
+        message_box.setWindowTitle("Sign Up")
+        message_box.setText("Are you an Admin or User?")
+        
+        # Add custom buttons
+        admin_button = message_box.addButton("Admin", QMessageBox.ActionRole)
+        user_button = message_box.addButton("User", QMessageBox.ActionRole)
+        
+        # Display the message box
+        message_box.exec_()
+        self.signup_page = User_SignUpPage()
+
+        # Check which button was clicked
+        if message_box.clickedButton() == admin_button:
+            print("Admin selected.")
+            self.signup_page = Admin_SignUpPage()  # Navigate to AdminSignUpPage
+        elif message_box.clickedButton() == user_button:
+            print("User selected.")
+            self.signup_page = User_SignUpPage()  # Navigate to UserSignUpPage
+
+        # Show the signup page
         self.signup_page.show()
         self.close()

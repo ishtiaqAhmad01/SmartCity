@@ -8,10 +8,6 @@ connection = pymysql.connect(
     database="ucsp"
 )
 
-
-
-
-
 def show_tables():
     cursor = connection.cursor()
     cursor.execute("SHOW TABLES")

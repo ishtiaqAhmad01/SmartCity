@@ -1,4 +1,6 @@
 import re
+import bcrypt
+
 
 def validate_email(email):
     # Regular expression for validating an email
@@ -6,6 +8,12 @@ def validate_email(email):
     if re.match(pattern, email):
         return True
     return False
+
+def hash_password(password):
+    hashed = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
+    print(hashed)
+    return hashed
+
 
 def pakistan_provinces():
     return ['Punjab', 'Sindh', 'Balochistan', 'Khyber Pakhtunkhwa', 'Gilgit-Baltistan', 'Azad Jammu and Kashmir']

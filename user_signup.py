@@ -4,11 +4,11 @@ from PyQt5.QtGui import *
 from database import *
 from functions import *
 
-class SignUpPage(QWidget):
+class User_SignUpPage(QWidget):
     def __init__(self):
         super().__init__()
 
-        self.setWindowTitle("Smart City Management - Sign Up")
+        self.setWindowTitle("Smart City Management - User Sign Up")
         self.setGeometry(300, 100, 1400, 900)
         self.setFixedSize(1400, 900)
         self.setStyleSheet("background-color: #2C3E50;")  # Background color

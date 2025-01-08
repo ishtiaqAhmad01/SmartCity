@@ -1,60 +1,81 @@
-# import pymysql
+import pymysql
+from functions import hash_password
 
-# # Connect to the database
-# connection = pymysql.connect(
-#     host="localhost",
-#     user="root",
-#     password="5533",
-#     database="project"
-# )
+# Connect to the database
+connection = pymysql.connect(
+    host='localhost',
+    user='root',
+    passwd='5533',
+    db='ucsp',
+)
 
-# def check_email(email):
-#     try:
-#         cursor = connection.cursor()
+def check_user_cnic_password(cnic, password):
+    with connection.cursor() as cursor:
+        query = "SELECT cnic, password FROM USERS WHERE cnic = %s"
+        cursor.execute(query, (cnic,))
+        result = cursor.fetchone()
+        if result and result[0] == hash_password(password):
+            return True
+        else:
+            return False
 
-#         query = "SELECT * FROM users WHERE email = %s"
-#         cursor.execute(query, (email,))
-#         result = cursor.fetchone()
+def check_admin_cnic_password(cnic, password):
+    with connection.cursor() as cursor:
+        query = "SELECT cnic, password FROM USERS WHERE cnic = %s"
+        cursor.execute(query, (cnic,))
+        result = cursor.fetchone()
+        if result and result[0] == hash_password(password):
+            return True
+        else:
+            return False
 
-#         if result:
-#             return True
-#         else:
-#             return False
+def check_email(email):
+    try:
+        cursor = connection.cursor()
 
-#     finally:
-#         connection.close()
+        query = "SELECT * FROM users WHERE email = %s"
+        cursor.execute(query, (email,))
+        result = cursor.fetchone()
 
-# def check_phone(phone):
-#     try:
-#         cursor = connection.cursor()
+        if result:
+            return True
+        else:
+            return False
 
-#         query = "SELECT * FROM users WHERE phone = %s"
-#         cursor.execute(query, (phone,))
-#         result = cursor.fetchone()
+    finally:
+        connection.close()
 
-#         if result:
-#             return True
-#         else:
-#             return False
+def check_phone(phone):
+    try:
+        cursor = connection.cursor()
 
-#     finally:
-#         connection.close()
+        query = "SELECT * FROM users WHERE phone = %s"
+        cursor.execute(query, (phone,))
+        result = cursor.fetchone()
 
-# def check_cnic(cnic):
-#     try:
-#         cursor = connection.cursor()
+        if result:
+            return True
+        else:
+            return False
 
-#         query = "SELECT * FROM users WHERE cnic = %s"
-#         cursor.execute(query, (cnic,))
-#         result = cursor.fetchone()
+    finally:
+        connection.close()
 
-#         if result:
-#             return True
-#         else:
-#             return False
+def check_cnic(cnic):
+    try:
+        cursor = connection.cursor()
 
-#     finally:
-#         connection.close()
+        query = "SELECT * FROM users WHERE cnic = %s"
+        cursor.execute(query, (cnic,))
+        result = cursor.fetchone()
+
+        if result:
+            return True
+        else:
+            return False
+
+    finally:
+        connection.close()
 
 # def insert_signup_info(first_name, last_name, email, phone, cnic, password, user_type):
 #     pass
