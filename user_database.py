@@ -19,16 +19,6 @@ def check_user_cnic_password(cnic, password):
         else:
             return False
 
-def check_admin_cnic_password(cnic, password):
-    with connection.cursor() as cursor:
-        query = "SELECT cnic, password FROM USERS WHERE cnic = %s"
-        cursor.execute(query, (cnic,))
-        result = cursor.fetchone()
-        if result and result[0] == hash_password(password):
-            return True
-        else:
-            return False
-
 def check_email(email):
     try:
         cursor = connection.cursor()
@@ -48,7 +38,6 @@ def check_email(email):
 def check_phone(phone):
     try:
         cursor = connection.cursor()
-
         query = "SELECT * FROM users WHERE phone = %s"
         cursor.execute(query, (phone,))
         result = cursor.fetchone()
@@ -77,5 +66,8 @@ def check_cnic(cnic):
     finally:
         connection.close()
 
-# def insert_signup_info(first_name, last_name, email, phone, cnic, password, user_type):
-#     pass
+def delete_complaint_from_db():
+    pass
+
+def add_deleded_complaint():
+    pass

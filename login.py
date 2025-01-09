@@ -4,7 +4,7 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QColor, QPalette, QFont
 from user_signup import User_SignUpPage
 from admin_signup import Admin_SignUpPage
-from dashboard import MainWindow
+from user_dashboard import user_MainWindow
 
 class LoginPage(QWidget):
     def __init__(self):
@@ -129,18 +129,14 @@ class LoginPage(QWidget):
         else:
             self.varify_admin(username, password)
 
-
     def varify_citizen(self, username, password):
-        pass
+        # Check if the user exists in the database
+
+        self.go_to_user_dashboard()
 
     def varify_admin(self, username, password):
-        pass
-
-
-    def login(self):
-        self.dashboard = MainWindow()
-        self.dashboard.show()
-        self.close()
+        # Check if the admin exists in the database
+        self.go_to_admin_dashboard()
 
     def show_error_message(self, message):
         msg = QMessageBox()
@@ -183,3 +179,11 @@ class LoginPage(QWidget):
         # Show the signup page
         self.signup_page.show()
         self.close()
+
+    def go_to_user_dashboard(self):
+        self.dashboard = user_MainWindow()
+        self.dashboard.show()
+        self.close()
+    
+    def go_to_admin_dashboard(self):
+        pass

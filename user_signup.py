@@ -1,7 +1,7 @@
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import *
-from database import *
+from user_database import *
 from functions import *
 
 class User_SignUpPage(QWidget):

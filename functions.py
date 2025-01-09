@@ -18,6 +18,7 @@ def hash_password(password):
 def pakistan_provinces():
     return ['Punjab', 'Sindh', 'Balochistan', 'Khyber Pakhtunkhwa', 'Gilgit-Baltistan', 'Azad Jammu and Kashmir']
 
+
 def provinces_districts(province):
     province_to_districts = {
     "Punjab": [
@@ -105,6 +106,52 @@ def district_tehsils(district):
     "Astore": ["Astore City", "Diamer", "Gilgit", "Skardu"]
     }
     return district_to_tehsils.get(district, [])
+
+def majorProblem_to_subProblem(majorProblem):
+    smart_city_issues = {
+    "Electrical": [
+        "Power Grid Management", 
+        "Renewable Energy Integration", 
+        "Electric Vehicle (EV) Charging Infrastructure", 
+        "Energy Consumption Monitoring", 
+        "Streetlight Automation", 
+        "Energy Distribution Efficiency"
+    ],
+    "Plumbing": [
+        "Water Leak Detection", 
+        "Water Quality Monitoring", 
+        "Sewer System Management", 
+        "Water Conservation", 
+        "Wastewater Treatment Optimization", 
+        "Pressure Monitoring"
+    ],
+    "Potholes": [
+        "Road Surface Monitoring", 
+        "Automated Reporting Systems", 
+        "Pothole Repair Scheduling", 
+        "Material Quality Tracking", 
+        "Public Notification Systems", 
+        "Damage Severity Assessment"
+    ],
+    "Street Lighting": [
+        "Smart Lighting Systems", 
+        "Energy-Efficient Lighting", 
+        "Lighting Maintenance", 
+        "Traffic Adaptive Lighting", 
+        "Public Safety Lighting", 
+        "Integration with Smart City Infrastructure"
+    ],
+    "Garbage": [
+        "Waste Collection Optimization", 
+        "Recycling Systems", 
+        "Waste-to-Energy Systems", 
+        "Waste Monitoring", 
+        "Public Awareness Programs", 
+        "Landfill Management"
+    ]
+    }
+    return smart_city_issues.get(majorProblem, [])  
+
 
 def doc_as_binary(image_path):
     try:

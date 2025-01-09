@@ -1,11 +1,12 @@
 import sys
-from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QLabel, QStackedWidget
+from PyQt5.QtWidgets import *
 from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QPixmap, QFont
-from PyQt5.QtWidgets import QVBoxLayout, QHBoxLayout, QFrame
 from page1 import Page1
+from page2 import DigitalDocumentStorage
+from page3 import PublicTransportBooking
+from page4 import AppointmentBooking
 
-class MainWindow(QWidget):
+class user_MainWindow(QWidget):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Sidebar Navigation Example")
@@ -61,8 +62,13 @@ class MainWindow(QWidget):
 
     def add_pages(self):
         page1 = Page1()
+        page2 = DigitalDocumentStorage()
+        page3 = PublicTransportBooking()
+        page4 = AppointmentBooking()
         self.content_area.addWidget(page1)
-
+        self.content_area.addWidget(page2)
+        self.content_area.addWidget(page3)
+        self.content_area.addWidget(page4)
 
     def show_content(self, page):
         """
@@ -71,10 +77,8 @@ class MainWindow(QWidget):
         """
         self.content_area.setCurrentIndex(page - 1)
 
-
-# Main entry point
 if __name__ == '__main__':
     app = QApplication(sys.argv)
-    window = MainWindow()
+    window = user_MainWindow()
     window.show()
     sys.exit(app.exec_())

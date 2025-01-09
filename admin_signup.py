@@ -1,7 +1,7 @@
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import *
-from database import *
+from user_database import *
 from functions import *
 
 class Admin_SignUpPage(QWidget):
@@ -85,6 +85,11 @@ class Admin_SignUpPage(QWidget):
         submit_button.setStyleSheet(self.button_style())
         submit_button.clicked.connect(self.sign_up)
 
+        # create a button to go to login page
+        self.sign_in_button = QPushButton("Already have an account? Log In")
+        self.sign_in_button.setStyleSheet(self.button_style())
+        self.sign_in_button.clicked.connect(self.go_to_login)
+
         # Add form fields to the layout
         form_layout.addWidget(name_label)
         form_layout.addWidget(self.name_input)
@@ -97,7 +102,8 @@ class Admin_SignUpPage(QWidget):
         form_layout.addWidget(address_label)
         form_layout.addWidget(self.address_input)
         form_layout.addWidget(submit_button)
-
+        form_layout.addWidget(self.sign_in_button)
+        
         # Add form layout to main layout
         main_layout.addLayout(form_layout)
         self.setLayout(main_layout)
@@ -125,4 +131,9 @@ class Admin_SignUpPage(QWidget):
     
     def sign_up(self):
         pass
-    
+            
+    def go_to_login(self):
+        self.close()
+        from login import LoginPage
+        self.login_page = LoginPage()
+        self.login_page.show()

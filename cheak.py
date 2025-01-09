@@ -3,7 +3,7 @@ import pymysql
 # Connect to the database
 connection = pymysql.connect(
     host="localhost",
-    user="root",
+    user="user",
     password="5533",
     database="ucsp"
 )
