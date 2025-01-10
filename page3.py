@@ -40,6 +40,7 @@ class PublicTransportBooking(QWidget):
                 font-weight: bold;
             }
         """)
+        
         self.init_route_search_tab()
         self.init_booking_history_tab()
 

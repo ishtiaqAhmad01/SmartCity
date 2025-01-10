@@ -15,7 +15,7 @@ class AppointmentBooking(QWidget):
         # Header
         header = QLabel("Appointment Booking System")
         header.setAlignment(Qt.AlignCenter)
-        header.setStyleSheet("font-size: 24px; font-weight: bold; color: white;")
+        header.setStyleSheet("font-size: 24px; font-weight: bold; color: #333;")
         layout.addWidget(header)
 
         # Tab Widget
@@ -23,11 +23,12 @@ class AppointmentBooking(QWidget):
         self.tab_widget.setStyleSheet("""
             QTabWidget::pane {
                 border: 1px solid #C0C0C0;
-                background: #F0F0F0;
+                background: #FFFFFF;
                 border-radius: 10px;
             }
             QTabBar::tab {
                 background: #3498DB;
+                width: 200px;
                 color: white;
                 font-size: 16px;
                 padding: 10px;
@@ -121,7 +122,7 @@ class AppointmentBooking(QWidget):
         self.history_table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
         self.history_table.setStyleSheet("""
             QTableWidget {
-                background-color: #ECF0F1;
+                background-color: #FFFFFF;
                 border: 1px solid #BDC3C7;
                 border-radius: 10px;
                 font-size: 14px;
@@ -218,6 +219,6 @@ if __name__ == "__main__":
     import sys
     app = QApplication(sys.argv)
     window = AppointmentBooking()
-    window.setStyleSheet("background-color: #2C3E50; color: white;")
+    window.setStyleSheet("background-color: #FFFFFF; color: #333;")
     window.show()
     sys.exit(app.exec_())
