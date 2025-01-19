@@ -4,7 +4,10 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QColor, QPalette, QFont
 from user_signup import User_SignUpPage
 from admin_signup import Admin_SignUpPage
-from user_dashboard import user_MainWindow
+from user_dashboard import UserDashboard
+from admin_dashboard import AdminDashboard
+from user_database import check_user_cnic_password, check_admin_cnic_password
+import globals
 
 class LoginPage(QWidget):
     def __init__(self):
@@ -130,14 +133,20 @@ class LoginPage(QWidget):
             self.varify_admin(username, password)
 
     def varify_citizen(self, username, password):
-        # Check if the user exists in the database
-
-        self.go_to_user_dashboard()
+        if check_user_cnic_password(username, password):
+            globals.set_user_id(username)  # track through out app
+            print(globals.get_user_id())
+            self.go_to_user_dashboard()
+        else:
+            self.show_error_message("Invalid CNIC or Password.")
 
     def varify_admin(self, username, password):
-        # Check if the admin exists in the database
-        self.go_to_admin_dashboard()
-
+        if check_admin_cnic_password(username, password):
+            globals.set_user_id(username)  # track through out app
+            self.go_to_admin_dashboard()
+        else:
+            self.show_error_message("Invalid CNIC or Password.")
+    
     def show_error_message(self, message):
         msg = QMessageBox()
         msg.setIcon(QMessageBox.Critical)
@@ -155,35 +164,36 @@ class LoginPage(QWidget):
         msg.exec_()
     
     def go_to_signup(self):
-        # Create a custom QMessageBox
         message_box = QMessageBox(self)
         message_box.setWindowTitle("Sign Up")
         message_box.setText("Are you an Admin or User?")
         
-        # Add custom buttons
+        
         admin_button = message_box.addButton("Admin", QMessageBox.ActionRole)
         user_button = message_box.addButton("User", QMessageBox.ActionRole)
         
-        # Display the message box
+        
         message_box.exec_()
         self.signup_page = User_SignUpPage()
 
-        # Check which button was clicked
+        
         if message_box.clickedButton() == admin_button:
             print("Admin selected.")
-            self.signup_page = Admin_SignUpPage()  # Navigate to AdminSignUpPage
+            self.signup_page = Admin_SignUpPage() 
         elif message_box.clickedButton() == user_button:
             print("User selected.")
-            self.signup_page = User_SignUpPage()  # Navigate to UserSignUpPage
+            self.signup_page = User_SignUpPage()  
 
-        # Show the signup page
+        
         self.signup_page.show()
         self.close()
 
     def go_to_user_dashboard(self):
-        self.dashboard = user_MainWindow()
+        self.dashboard = UserDashboard()
         self.dashboard.show()
         self.close()
     
     def go_to_admin_dashboard(self):
-        pass
+        self.dashboard = AdminDashboard()
+        self.dashboard.show()
+        self.close()

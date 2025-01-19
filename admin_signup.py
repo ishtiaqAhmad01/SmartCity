@@ -3,6 +3,7 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtGui import *
 from user_database import *
 from functions import *
+from user_database import add_admin_to_db
 
 class Admin_SignUpPage(QWidget):
     def __init__(self):
@@ -59,6 +60,13 @@ class Admin_SignUpPage(QWidget):
         self.email_input.setPlaceholderText("Enter your email")
         self.email_input.setStyleSheet(self.input_style())
 
+         # Cnic field
+        cnic_label = QLabel("Cnic:")
+        cnic_label.setStyleSheet("color: white; font-size: 14px;")
+        self.cnic_input = QLineEdit()
+        self.cnic_input.setPlaceholderText("Enter your Cnic")
+        self.cnic_input.setStyleSheet(self.input_style())
+
         # Password field
         password_label = QLabel("Password:")
         password_label.setStyleSheet("color: white; font-size: 14px;")
@@ -83,7 +91,7 @@ class Admin_SignUpPage(QWidget):
         # Button to submit the form
         submit_button = QPushButton("Sign Up")
         submit_button.setStyleSheet(self.button_style())
-        submit_button.clicked.connect(self.sign_up)
+        submit_button.clicked.connect(self.sign_up_btn)
 
         # create a button to go to login page
         self.sign_in_button = QPushButton("Already have an account? Log In")
@@ -95,6 +103,8 @@ class Admin_SignUpPage(QWidget):
         form_layout.addWidget(self.name_input)
         form_layout.addWidget(email_label)
         form_layout.addWidget(self.email_input)
+        form_layout.addWidget(cnic_label)
+        form_layout.addWidget(self.cnic_input)
         form_layout.addWidget(password_label)
         form_layout.addWidget(self.password_input)
         form_layout.addWidget(phone_label)
@@ -104,7 +114,7 @@ class Admin_SignUpPage(QWidget):
         form_layout.addWidget(submit_button)
         form_layout.addWidget(self.sign_in_button)
         
-        # Add form layout to main layout
+        
         main_layout.addLayout(form_layout)
         self.setLayout(main_layout)
     
@@ -129,9 +139,32 @@ class Admin_SignUpPage(QWidget):
             transition: background-color 0.3s ease;
         """
     
-    def sign_up(self):
-        pass
-            
+    def sign_up_btn(self):
+        cnic = self.cnic_input.text()
+        name = self.name_input.text()
+        email = self.email_input.text()
+        phone_number = self.phone_input.text()
+        password_hash = self.password_input.text()
+        address = self.address_input.text()
+
+        if not (cnic and name and email and phone_number and password_hash and address):
+            QMessageBox.critical(self, "Error", "Please fill all info.")
+            return
+
+        if not validate_email(email):
+            QMessageBox.critical(self, "Error", "Please fill corret email.")
+            return
+        
+        if len(phone_number) != 11 or not phone_number.isdigit():
+            QMessageBox.critical(self, "Error", "Please fill corret Phone Number.")
+            return
+        
+        if add_admin_to_db(cnic, name, email, phone_number, password_hash, address):
+            QMessageBox.information(self, "Success", "User has been added successfully.")
+            self.go_to_login()
+        else:
+            QMessageBox.critical(self, "Error", "There was a error while Sign-up \n please try again.")
+              
     def go_to_login(self):
         self.close()
         from login import LoginPage

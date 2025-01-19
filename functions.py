@@ -1,23 +1,242 @@
 import re
 import bcrypt
+from random import randint
+import smtplib
+import random
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+from email.mime.base import MIMEBase
+from email import encoders
+import os
 
+
+def table_style():
+    return """
+        QTableWidget {
+            background-color: #F9FBFD;
+            border: 1px solid #D3D9DE;
+            border-radius: 8px;
+            font-size: 14px;
+            gridline-color: #E0E0E0;
+        }
+        QHeaderView::section {
+            background-color: #5DADE2;
+            color: white;
+            font-weight: bold;
+            padding: 8px;
+            border: none;
+        }
+        QTableWidget::item {
+            padding: 5px;
+        }
+        QScrollBar:vertical {
+            border: none;
+            background: #ECF0F1;
+            width: 10px;
+        }
+    """
+
+def line_edit_style_rounded():
+    return """
+        QLineEdit {
+            background-color: #FBFCFC;
+            border: 2px solid #D5DBDB;
+            border-radius: 10px;
+            padding: 8px;
+            font-size: 14px;
+            color: #2C3E50;
+        }
+        QLineEdit:hover {
+            border-color: #3498DB;
+        }
+        QLineEdit:focus {
+            border-color: #2980B9;
+            background-color: #F0F3F4;
+        }
+    """
+
+def tab_style():
+    return """
+        QTabWidget::pane {
+            border: 1px solid #D6DBDF;
+            background: #F2F4F4;
+            border-radius: 8px;
+        }
+        QTabBar::tab {
+            background: #3498DB;
+            color: white;
+            font-size: 15px;
+            padding: 8px 15px;
+            border-radius: 5px;
+            margin: 2px;
+            width: 180px;
+        }
+        QTabBar::tab:hover {
+            background: #2980B9;
+        }
+        QTabBar::tab:selected {
+            background: #1A5276;
+            font-weight: bold;
+        }
+        QPushButton {
+            background-color: #27AE60;
+            color: white;
+            border-radius: 5px;
+            padding: 8px 12px;
+            font-size: 14px;
+        }
+        QPushButton:hover {
+            background-color: #229954;
+        }
+    """
+
+def spin_box_style():
+    return """
+        QSpinBox, QDoubleSpinBox {
+            background-color: #FBFCFC;
+            border: 2px solid #D5DBDB;
+            border-radius: 10px;
+            padding: 8px;
+            font-size: 14px;
+            color: #2C3E50;
+        }
+
+        QSpinBox::up-arrow, QDoubleSpinBox::up-arrow,
+        QSpinBox::down-arrow, QDoubleSpinBox::down-arrow {
+            width: 8px;
+            height: 8px;
+        }
+    """
+
+def send_bill_email(to_email, pdf_path, bill_info):
+    # Email credentials
+    sender_email = "unifiedcityservicesplatform@gmail.com"
+    sender_password = "bajogglnmhmxpljy"
+
+    # Email subject and body
+    subject = f"Utility Bill for {bill_info['bill_type']} - Due {bill_info['due_date']}"
+    body = f"""
+    Dear Customer,
+
+    Please find attached your utility bill for {bill_info['bill_type']}.
+
+    Bill Summary:
+    - Amount Before Due: Rs {bill_info['amount_before_due']:.2f}
+    - Tax: Rs {bill_info['tax_amount']:.2f}
+    - Late Fee: Rs {bill_info['late_fee']:.2f}
+    - Total Amount Due: Rs {bill_info['amount_after_due']:.2f}
+    - Due Date: {bill_info['due_date']}
+
+    Please make your payment before the due date to avoid additional charges.
+
+    Thank you,
+    Unified City Services Platform
+    """
+
+    # Creating the email message
+    msg = MIMEMultipart()
+    msg['From'] = sender_email
+    msg['To'] = to_email
+    msg['Subject'] = subject
+
+    # Attach email body
+    msg.attach(MIMEText(body, 'plain'))
+
+    # Attach the PDF file
+    try:
+        with open(pdf_path, 'rb') as pdf_file:
+            pdf_attachment = MIMEBase('application', 'octet-stream')
+            pdf_attachment.set_payload(pdf_file.read())
+            encoders.encode_base64(pdf_attachment)
+            pdf_attachment.add_header(
+                'Content-Disposition',
+                f'attachment; filename={os.path.basename(pdf_path)}'
+            )
+            msg.attach(pdf_attachment)
+    except Exception as e:
+        print(f"Error attaching PDF: {e}")
+        return False
+
+    # Sending the email
+    try:
+        with smtplib.SMTP_SSL('smtp.gmail.com', 465) as server:
+            server.login(sender_email, sender_password)
+            server.sendmail(sender_email, to_email, msg.as_string())
+        print(f"Utility bill successfully sent to {to_email}")
+        return True
+    except Exception as e:
+        print(f"Failed to send email: {e}")
+        return False
+
+def generate_otp(length=6):
+    otp = ''.join(str(random.randint(0, 9)) for _ in range(length))
+    return otp
+
+def send_email(to_email, otp):
+    """
+    Send the generated OTP via email.
+    """
+    import os
+
+    sender_email = "unifiedcityservicesplatform@gmail.com"
+    sender_password = "bajogglnmhmxpljy"
+
+    subject = "Verification Code"
+    html_content = f"""
+            <!DOCTYPE html>
+        <html>
+        <head>
+            <title>Verification Code</title>
+        </head>
+        <body style="font-family: Helvetica, Arial, sans-serif; margin: 0px; padding: 0px; background-color: #ffffff;">
+            <table role="presentation" style="width: 100%; padding: 20px; background-color: #ffffff;">
+                <tr>
+                    <td align="center">
+                        <table role="presentation" style="max-width: 600px; width: 100%; background-color: #d3d3d3; padding: 20px; border-radius: 10px;">
+                            <tr>
+                                <td style="text-align: left;">
+                                    <h1 style="margin: 0; color: #333;">Verification Code</h1>
+                                    <p style="padding-bottom: 16px; color: #555;">Use the following verification code to complete your login:</p>
+                                    <h2 style="font-size: 130%; color: #333;"><strong>{otp}</strong></h2>
+                                    <p style="color: #555;">If you did not request this, please ignore this email.</p>
+                                    <p style="color: #555;">Thanks,<br>Unified City Services Platform, Team</p>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+            </table>
+        </body>
+        </html>
+    """
+
+    # Creating the email message
+    msg = MIMEMultipart()
+    msg['From'] = sender_email
+    msg['To'] = to_email
+    msg['Subject'] = subject
+    msg.attach(MIMEText(html_content, 'html'))
+
+    try:
+        with smtplib.SMTP_SSL('smtp.gmail.com', 465) as server:
+            server.login(sender_email, sender_password)
+            server.sendmail(sender_email, to_email, msg.as_string())
+        print(f"OTP successfully sent to {to_email}")
+    except Exception as e:
+        print(f"Failed to send email: {e}")
 
 def validate_email(email):
-    # Regular expression for validating an email
     pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
     if re.match(pattern, email):
         return True
     return False
 
 def hash_password(password):
-    hashed = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
-    print(hashed)
+    hashed = bcrypt.hashpw(password.encode('utf-8'), b'$2b$12$UpNSAeZLLDqh0CNTxSaRJe')
     return hashed
-
 
 def pakistan_provinces():
     return ['Punjab', 'Sindh', 'Balochistan', 'Khyber Pakhtunkhwa', 'Gilgit-Baltistan', 'Azad Jammu and Kashmir']
-
 
 def provinces_districts(province):
     province_to_districts = {
@@ -152,7 +371,6 @@ def majorProblem_to_subProblem(majorProblem):
     }
     return smart_city_issues.get(majorProblem, [])  
 
-
 def doc_as_binary(image_path):
     try:
         with open(image_path, 'rb') as file:
@@ -170,5 +388,27 @@ def binary_as_doc(binary_data, output_path):
         print(f"An error occurred: {e}")
 
 if __name__ == "__main__":
-    binary = doc_as_binary("faty.mp4")
-    binary_as_doc(binary, "faty_copy.mp4")
+    # Example Bill Information
+    bill_info_example = {
+        "bill_type": "Electricity",
+        "amount_before_due": 5000.00,
+        "tax_amount": 500.00,
+        "late_fee": 550.00,
+        "amount_after_due": 6050.00,
+        "due_date": "2025-01-15"
+    }
+
+    # Path to the generated PDF
+    pdf_path = "utility_bill_updated.pdf"
+
+    # Recipient email address
+    recipient_email = "s2023065078@umt.edu.pk"
+
+    # Send the email
+    if send_bill_email(recipient_email, pdf_path, bill_info_example):
+        print("Email sent successfully!")
+    else:
+        print("Failed to send email.")
+    # send_email('s2023065078@umt.edu.pk', '2354')
+
+

@@ -1,5 +1,6 @@
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import Qt, QDate
+from functions import table_style, tab_style
 
 
 class AppointmentBooking(QWidget):
@@ -20,26 +21,7 @@ class AppointmentBooking(QWidget):
 
         # Tab Widget
         self.tab_widget = QTabWidget()
-        self.tab_widget.setStyleSheet("""
-            QTabWidget::pane {
-                border: 1px solid #C0C0C0;
-                background: #FFFFFF;
-                border-radius: 10px;
-            }
-            QTabBar::tab {
-                background: #3498DB;
-                width: 200px;
-                color: white;
-                font-size: 16px;
-                padding: 10px;
-                border-radius: 5px;
-                margin: 2px;
-            }
-            QTabBar::tab:selected {
-                background: #2980B9;
-                font-weight: bold;
-            }
-        """)
+        self.tab_widget.setStyleSheet(tab_style())
 
         # Initialize Tabs
         self.init_new_appointment_tab()
@@ -120,20 +102,7 @@ class AppointmentBooking(QWidget):
             ["Service", "Location", "Date", "Time", "Status", "Actions"]
         )
         self.history_table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
-        self.history_table.setStyleSheet("""
-            QTableWidget {
-                background-color: #FFFFFF;
-                border: 1px solid #BDC3C7;
-                border-radius: 10px;
-                font-size: 14px;
-            }
-            QHeaderView::section {
-                background-color: #3498DB;
-                color: white;
-                font-weight: bold;
-                padding: 5px;
-            }
-        """)
+        self.history_table.setStyleSheet(table_style())
         layout.addWidget(self.history_table)
 
         # Add Appointment History tab to the tab widget

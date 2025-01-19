@@ -1,6 +1,6 @@
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import Qt, QDate
-
+from functions import table_style, tab_style
 
 class PublicTransportBooking(QWidget):
     def __init__(self):
@@ -20,26 +20,7 @@ class PublicTransportBooking(QWidget):
 
         # Tabs for Route Search and Booking History
         self.tab_widget = QTabWidget()
-        self.tab_widget.setStyleSheet("""
-            QTabWidget::pane {
-                border: 1px solid #C0C0C0;
-                background: #F0F0F0;
-                border-radius: 10px;
-            }
-            QTabBar::tab {
-                background: #3498DB;
-                color: white;
-                font-size: 16px;
-                padding: 10px;
-                border-radius: 5px;
-                margin: 2px;
-                width: 200px;
-            }
-            QTabBar::tab:selected {
-                background: #2980B9;
-                font-weight: bold;
-            }
-        """)
+        self.tab_widget.setStyleSheet(tab_style())
         
         self.init_route_search_tab()
         self.init_booking_history_tab()
@@ -107,20 +88,7 @@ class PublicTransportBooking(QWidget):
         self.route_table.setColumnCount(5)
         self.route_table.setHorizontalHeaderLabels(["Route", "Date", "Time", "Fare", "Actions"])
         self.route_table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
-        self.route_table.setStyleSheet("""
-            QTableWidget {
-                background-color: #ECF0F1;
-                border: 1px solid #BDC3C7;
-                border-radius: 10px;
-                font-size: 14px;
-            }
-            QHeaderView::section {
-                background-color: #3498DB;
-                color: white;
-                font-weight: bold;
-                padding: 5px;
-            }
-        """)
+        self.route_table.setStyleSheet(table_style())
         layout.addWidget(self.route_table)
 
         # Add Route Search tab to the tab widget
@@ -142,20 +110,7 @@ class PublicTransportBooking(QWidget):
         self.history_table.setColumnCount(6)
         self.history_table.setHorizontalHeaderLabels(["Route", "Date", "Time", "Fare", "Status", "Actions"])
         self.history_table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
-        self.history_table.setStyleSheet("""
-            QTableWidget {
-                background-color: #ECF0F1;
-                border: 1px solid #BDC3C7;
-                border-radius: 10px;
-                font-size: 14px;
-            }
-            QHeaderView::section {
-                background-color: #3498DB;
-                color: white;
-                font-weight: bold;
-                padding: 5px;
-            }
-        """)
+        self.history_table.setStyleSheet(table_style())
         layout.addWidget(self.history_table)
 
         # Refresh Button

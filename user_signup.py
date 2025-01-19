@@ -3,6 +3,10 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtGui import *
 from user_database import *
 from functions import *
+from user_database import add_user_to_db
+import random
+import time
+
 
 class User_SignUpPage(QWidget):
     def __init__(self):
@@ -15,12 +19,15 @@ class User_SignUpPage(QWidget):
 
         # Apply custom theme and font
         self.setTheme()
+
         
+        self.generated_otp = None
+        self.otp_timestamp = None
+
         # Create UI elements
         self.create_widgets()
 
     def setTheme(self):
-        # Set palette for modern dark theme
         palette = QPalette()
         palette.setColor(QPalette.Window, QColor("#2C3E50"))
         palette.setColor(QPalette.Button, QColor("#3498DB"))
@@ -37,14 +44,12 @@ class User_SignUpPage(QWidget):
 
         # Title Label
         title_label = QLabel("Register as New Member")
-        title_label.setStyleSheet("font-size: 45px; font-weight: bold; color: white;font-family: arial")
+        title_label.setStyleSheet("font-size: 45px; font-weight: bold; color: white; font-family: arial")
         title_label.setAlignment(Qt.AlignCenter)
         main_layout.addWidget(title_label)
 
-
         form_layout = QGridLayout()
 
-        
         self.first_name_input = QLineEdit()
         self.first_name_input.setPlaceholderText("Enter First Name")
         self.first_name_input.setStyleSheet(self.input_style())
@@ -81,8 +86,9 @@ class User_SignUpPage(QWidget):
         form_layout.addWidget(QLabel("Nationality:"), 2, 2)
         form_layout.addWidget(self.nationality_input, 2, 3)
 
-        self.dob_input = QLineEdit()
-        self.dob_input.setPlaceholderText("Enter Date of Birth (dd/mm/yyyy)")
+        
+        self.dob_input = QDateEdit()
+        self.dob_input.setDisplayFormat("yyyy/MM/dd") 
         self.dob_input.setStyleSheet(self.input_style())
         form_layout.addWidget(QLabel("Date of Birth:"), 3, 0)
         form_layout.addWidget(self.dob_input, 3, 1)
@@ -126,14 +132,11 @@ class User_SignUpPage(QWidget):
 
         self.tehsil_combo = QComboBox()
         self.tehsil_combo.addItems(district_tehsils(self.district_combo.currentText()))
-        self.district_combo.currentTextChanged.connect(self.update_tehsils)
-        self.tehsil_combo.addItems(district_tehsils(self.district_combo.currentText()))
         self.tehsil_combo.setStyleSheet(self.input_style())
         province_layout.addWidget(self.tehsil_combo)
 
-        province_layout.addWidget(QLabel("")) # Empty label for spacing
-        form_layout.addLayout(province_layout, 5, 0, 1, 6) 
-
+        province_layout.addWidget(QLabel(""))  # Empty label for spacing
+        form_layout.addLayout(province_layout, 5, 0, 1, 6)
 
         self.sign_up_button = QPushButton("Sign Up")
         self.sign_up_button.setStyleSheet(self.button_style())
@@ -146,7 +149,7 @@ class User_SignUpPage(QWidget):
         self.sign_in_button.clicked.connect(self.go_to_login)
 
         form_layout.addWidget(self.sign_in_button, 7, 2, 2, 1)
-        
+
         main_layout.addLayout(form_layout)
         self.setLayout(main_layout)
 
@@ -171,21 +174,6 @@ class User_SignUpPage(QWidget):
             transition: background-color 0.3s ease;
         """
     
-    def update_tehsils(self):
-        self.tehsil_combo.clear()
-        self.tehsil_combo.addItems(district_tehsils(self.district_combo.currentText()))
-
-    def update_tehsils(self):
-        self.tehsil_combo.clear()
-        self.tehsil_combo.addItems(district_tehsils(self.district_combo.currentText()))
-
-    def submit_signup(self):
-        pass
-
-    def update_districts(self):
-        self.district_combo.clear()
-        self.district_combo.addItems(provinces_districts(self.province_combo.currentText()))
-
     def submit_signup(self):
         first_name = self.first_name_input.text()
         last_name = self.last_name_input.text()
@@ -200,17 +188,22 @@ class User_SignUpPage(QWidget):
         province = self.province_combo.currentText()
         district = self.district_combo.currentText()
         tehsil = self.tehsil_combo.currentText()
+        pic_path = self.selected_file_path
+        binary_pic = doc_as_binary(pic_path)
 
-
-        if not first_name or not last_name or not phone or not email or not cnic:
+        if not cnic or not first_name or not phone or not email or not cnic or not dob or not password:
             QMessageBox.critical(self, "Error", "Please fill all the required fields.")
             return
-
+        
+        if not binary_pic:
+            QMessageBox.critical(self, "Error", "Please select a picture.")
+            return
+        
         if not validate_email(email):
             QMessageBox.critical(self, "Error", "Please enter a valid email address.")
             return
         
-        if check_email(email):
+        if check_user_email(email):
             QMessageBox.critical(self, "Error", "Email already exists. Please use a different email.")
             return
         
@@ -218,28 +211,119 @@ class User_SignUpPage(QWidget):
             QMessageBox.critical(self, "Error", "Passwords do not match. Please re-enter.")
             return
         
-        if phone and len(phone)!=11 and not phone.isdigit():
+        if phone and len(phone) != 11 and not phone.isdigit():
             QMessageBox.critical(self, "Error", "Please enter a valid phone number.")
             return
         
-        if cnic and len(cnic)!=13 and not cnic.isdigit():
+        if cnic and len(cnic) != 13 and not cnic.isdigit():
             QMessageBox.critical(self, "Error", "Please enter a valid CNIC number.")
             return
         
         if check_cnic(cnic):
             QMessageBox.critical(self, "Error", "CNIC already exists. Please use a different CNIC.")
             return
+        
+        self.generate_and_send_otp() 
+        self.show_otp_popup()  
+
+    def generate_and_send_otp(self):
+        self.generated_otp = random.randint(1000, 9999)
+        self.otp_timestamp = time.time()  
+        
+        send_email(self.email_input.text(), self.generated_otp)
+        print(f"OTP sent: {self.generated_otp}") 
+    
+    def show_otp_popup(self):
+        otp_dialog = QDialog(self)
+        otp_dialog.setWindowTitle("Enter OTP")
+        otp_dialog.setFixedSize(400, 200)
+        otp_dialog.setStyleSheet("background-color: #34495E; color: white;")
+        
+        # Layout for the dialog
+        layout = QVBoxLayout(otp_dialog)
+
+        # OTP Input Field
+        otp_label = QLabel("Enter the OTP sent to your phone/email:")
+        otp_label.setStyleSheet("font-size: 14px;")
+        layout.addWidget(otp_label)
+
+        otp_input = QLineEdit()
+        otp_input.setPlaceholderText("Enter OTP")
+        otp_input.setStyleSheet(self.input_style())
+        layout.addWidget(otp_input)
 
         
-        # Insert the data into the database
-        #insert(first_name, last_name, phone, email, cnic)
+        button_layout = QHBoxLayout()
+        
+        resend_button = QPushButton("Resend OTP")
+        resend_button.setStyleSheet(self.button_style())
+        resend_button.clicked.connect(self.resend_otp)  
+        button_layout.addWidget(resend_button)
 
+        submit_button = QPushButton("Submit")
+        submit_button.setStyleSheet(self.button_style())
+        submit_button.clicked.connect(lambda: self.verify_otp(otp_input.text(), otp_dialog))
+        button_layout.addWidget(submit_button)
+
+        layout.addLayout(button_layout)
+
+        # Show the dialog
+        otp_dialog.exec()
+
+    def resend_otp(self):
+        if time.time() - self.otp_timestamp > 60:
+            self.generate_and_send_otp()
+            QMessageBox.information(self, "OTP Sent", "A new OTP has been sent to your phone/email.")
+        else:
+            QMessageBox.warning(self, "Warning", "Please wait before requesting another OTP.")
+
+    def verify_otp(self, otp, dialog):
+        if otp == str(self.generated_otp):
+            QMessageBox.information(self, "Success", "OTP verified successfully.")
+            dialog.accept()  # Close OTP popup
+            self.finalize_signup() 
+        else:
+            QMessageBox.critical(self, "Error", "Invalid OTP. Please try again.")
+    
+    def finalize_signup(self):
+        first_name = self.first_name_input.text()
+        last_name = self.last_name_input.text()
+        phone = self.phone_input.text()
+        email = self.email_input.text()
+        cnic = self.cnic_input.text()
+        nationality = self.nationality_input.text()
+        dob = self.dob_input.text()
+        gender = self.gender_combo.currentText()
+        password = self.password_input.text()
+        province = self.province_combo.currentText()
+        district = self.district_combo.currentText()
+        tehsil = self.tehsil_combo.currentText()
+        pic_path = self.selected_file_path
+        binary_pic = doc_as_binary(pic_path)
+
+        # Print all the variables
+        print(f"First Name: {first_name}")
+        print(f"Last Name: {last_name}")
+        print(f"Phone: {phone}")
+        print(f"Email: {email}")
+        print(f"CNIC: {cnic}")
+        print(f"Nationality: {nationality}")
+        print(f"Date of Birth: {dob}")
+        print(f"Gender: {gender}")
+        print(f"Password: {password}")
+        print(f"Province: {province}")
+        print(f"District: {district}")
+        print(f"Tehsil: {tehsil}")
+        print(f"Picture Path: {pic_path}")
 
         
-        # Retrieve the picture path if available
-        picture_path = self.picture_label.pixmap().cacheKey() if self.picture_label.pixmap() else None
-        
-        pass
+        # Add user to the database
+        if add_user_to_db(first_name=first_name, last_name=last_name, phone=phone, email=email, cnic=cnic, gender=gender, password=password, province=province, district=district, tehsil=tehsil, pic=pic_path, dob=dob):
+            QMessageBox.information(self, "Success", "User added successfully.")
+            self.go_to_login()
+        else:
+            QMessageBox.critical(self, "Error", "An error occurred. Please try again.")
+            return
 
     def create_picture_selector(self, layout):
         picture_layout = QVBoxLayout()
@@ -263,17 +347,35 @@ class User_SignUpPage(QWidget):
         file_path, _ = QFileDialog.getOpenFileName(self, "Select Picture", "", "Images (*.png *.jpg *.jpeg *.bmp)")
         if file_path:
             pixmap = QPixmap(file_path)
+            if pixmap.isNull():
+                QMessageBox.critical(self, "Error", "The selected image is not valid.")
+            else:
+                self.picture_label.setPixmap(pixmap.scaled(self.picture_label.size(), Qt.KeepAspectRatio))
+                self.picture_label.setText("")
+        if pixmap.isNull():  
+            QMessageBox.critical(self, "Error", "The selected image is not valid.")
+        else:
+            self.selected_file_path = file_path  # Store the file path
             self.picture_label.setPixmap(pixmap.scaled(self.picture_label.size(), Qt.KeepAspectRatio))
-            self.picture_label.setText("")  
-        
+            self.picture_label.setText("")
+
     def go_to_login(self):
         self.close()
         from login import LoginPage
         self.login_page = LoginPage()
         self.login_page.show()
 
+    def update_tehsils(self):
+        self.tehsil_combo.clear()
+        self.tehsil_combo.addItems(district_tehsils(self.district_combo.currentText()))
+
+    def update_districts(self):
+        self.district_combo.clear()
+        self.district_combo.addItems(provinces_districts(self.province_combo.currentText()))
+
+
 if __name__ == '__main__':
     app = QApplication([])
-    window = SignUpPage()
+    window = User_SignUpPage()
     window.show()
     app.exec_()

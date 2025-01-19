@@ -1,8 +1,11 @@
 from PyQt5.QtWidgets import *
+import os
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QFont
-from functions import doc_as_binary, binary_as_doc
 from page2_form import AddDocumentPopup
+from functions import *
+import globals
+from user_database import add_doc_to_database, load_doc_from_database, get_file_from_database, get_fileinfo_from_database
 
 class DigitalDocumentStorage(QWidget):
     def __init__(self):
@@ -13,7 +16,6 @@ class DigitalDocumentStorage(QWidget):
         layout = QVBoxLayout()
         layout.setContentsMargins(10, 10, 10, 10)
         
-
         header = QLabel("Digital Document Storage System")
         header.setAlignment(Qt.AlignCenter)
         header.setStyleSheet("font-size: 24px; font-weight: bold; color: white;")
@@ -21,26 +23,7 @@ class DigitalDocumentStorage(QWidget):
         layout.addWidget(header)
 
         self.tab_widget = QTabWidget()
-        self.tab_widget.setStyleSheet("""
-            QTabWidget::pane {
-                border: 1px solid #C0C0C0;
-                background: #F0F0F0;
-                border-radius: 10px;
-            }
-            QTabBar::tab {
-                background: #3498DB;
-                color: white;
-                font-size: 16px;
-                padding: 10px;
-                border-radius: 5px;
-                margin: 2px;
-                width: 200px;
-            }
-            QTabBar::tab:selected {
-                background: #2980B9;
-                font-weight: bold;
-            }
-        """)
+        self.tab_widget.setStyleSheet(tab_style())
         layout.addWidget(self.tab_widget)
 
         self.view_documents_tab()
@@ -75,27 +58,14 @@ class DigitalDocumentStorage(QWidget):
         self.filter_dropdown = QComboBox()
         self.filter_dropdown.addItems(["All", "Personal", "Bills", "Receipts", "Government IDs", "Others"])
         self.filter_dropdown.setStyleSheet("padding: 8px; border: 1px solid #BDC3C7; border-radius: 5px;")
-        self.filter_dropdown.currentIndexChanged.connect(self.filter_documents)
+        self.filter_dropdown.currentIndexChanged.connect(self.refresh_documents)
         view_layout.addWidget(self.filter_dropdown)
 
         self.document_table = QTableWidget()
         self.document_table.setColumnCount(3)
         self.document_table.setHorizontalHeaderLabels(["File Name", "Category", "Download/View"])
         self.document_table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
-        self.document_table.setStyleSheet("""
-            QTableWidget {
-                background-color: #ECF0F1;
-                border: 1px solid #BDC3C7;
-                border-radius: 10px;
-                font-size: 14px;
-            }
-            QHeaderView::section {
-                background-color: #3498DB;
-                color: white;
-                font-weight: bold;
-                padding: 5px;
-            }
-        """)
+        self.document_table.setStyleSheet(table_style())
         self.document_table.setEditTriggers(QAbstractItemView.NoEditTriggers)
         view_layout.addWidget(self.document_table)
 
@@ -123,7 +93,20 @@ class DigitalDocumentStorage(QWidget):
     def open_add_document_popup(self):
         popup = AddDocumentPopup(self)
         popup.move(self.geometry().right() - popup.width() - 20, self.geometry().top() + 50)  # Align popup to the right
-        popup.exec_()
+        if popup.exec_() == QDialog.Accepted:
+            file_name, file_path, category = popup.get_document_info()
+            print(f"Document Name: {file_name}, File Path: {file_path}, Category: {category}")
+            _ , ext = os.path.splitext(file_path)
+            self.add_doc(file_name, file_path, category, ext)
+        else:
+            ... # do nothing
+    
+    def add_doc(self, file_name, file_path, category, ext):
+        if add_doc_to_database(cnic=globals.get_user_id(), document_name=file_name, document_ext=ext, document_type=category, doc=file_path):
+            QMessageBox.information(None, "Done", "Docment is uploaded Successfully.", QMessageBox.Ok)
+            self.refresh_documents()
+        else:
+            QMessageBox.critical(None, "Error", "Docment is uploaded UnSuccessfull.", QMessageBox.Ok)
 
     def settings_tab(self):
         settings_tab = QWidget()
@@ -144,20 +127,24 @@ class DigitalDocumentStorage(QWidget):
         settings_tab.setLayout(settings_layout)
         self.tab_widget.addTab(settings_tab, "Settings")
 
-    def filter_documents(self):
-        pass
-
     def refresh_documents(self):
-        self.document_table.setRowCount(3)
-        example_data = [
-            {"File Name": "Document1.pdf", "Category": "Bills"},
-            {"File Name": "ID_Card.jpg", "Category": "Government IDs"},
-            {"File Name": "Receipt.png", "Category": "Receipts"}
-        ]
+        data = []
+        loaded_from_database = load_doc_from_database(globals.get_user_id())
+
+        if not loaded_from_database:
+            return
+            
+
+        for row in loaded_from_database:
+            if row[2] == self.filter_dropdown.currentText() or self.filter_dropdown.currentText() == 'All':
+                data.append({"File Name": row[0]+row[1], "Category": row[2]})
+
 
         self.document_table.setColumnCount(3)
+        self.document_table.setRowCount(len(data))
 
-        for row, data in enumerate(example_data):
+        for row, data in enumerate(data):
+            print(self.filter_dropdown.currentText(),"===",data["Category"] )
             self.document_table.setItem(row, 0, QTableWidgetItem(data["File Name"]))
             self.document_table.setItem(row, 1, QTableWidgetItem(data["Category"]))
 
@@ -204,12 +191,25 @@ class DigitalDocumentStorage(QWidget):
             self.document_table.setCellWidget(row, 2, actions_widget)
 
     def view_document(self, file_name):
-        QMessageBox.information(self, "View Document", f"Viewing {file_name}")
+        document_id, upload_date, cnic, document_name, document_ext, document_type = get_fileinfo_from_database(globals.get_user_id(), file_name)
+        QMessageBox.information(self, "View Document", f" File Id : {document_id} \n File Name :  {document_name} \n File Extention : {document_ext} \n Upload date : {upload_date} \n Category : {document_type}")
 
     def download_document(self, file_name):
         file_path, _ = QFileDialog.getSaveFileName(self, "Save Document", file_name)
         if file_path:
-            QMessageBox.information(self, "Download Document", f"Saved {file_name} to {file_path}")
+            try:
+                doc = get_file_from_database(globals.get_user_id(), file_name)
+                print("path = ",file_name)
+                print("user = ",globals.get_user_id())
+                if len(doc)!=0:
+                    binary_as_doc(doc[0], file_path) #bcz it return tuple 
+                    QMessageBox.information(self, "Download Document", f"Saved {file_name} to {file_path}")
+                else:
+                    print("return none file from database")
+            except Exception as e:
+                print(e)
+        else:
+            QMessageBox.critical(self, "Error", "Please Select a Valid location/Path")
 
 if __name__ == "__main__":
     import sys

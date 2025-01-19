@@ -2,13 +2,15 @@ import sys
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QFont
+from functions import table_style, tab_style
+from user_database import load_current_bills_data
+import globals
 
 class UtilityBillManagement(QWidget):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Utility Bill Management")
         self.setGeometry(300, 100, 1000, 600)
-        self.setStyleSheet("background-color: #2C3E50; color: white;")
         self.init_ui()
 
     def init_ui(self):
@@ -24,26 +26,7 @@ class UtilityBillManagement(QWidget):
 
         # Tabs for Current and Previous Bills
         self.tabs = QTabWidget()
-        self.tabs.setStyleSheet("""
-            QTabWidget::pane {
-                border: 1px solid #C0C0C0;
-                background: #F0F0F0;
-                border-radius: 10px;
-            }
-            QTabBar::tab {
-                background: #3498DB;
-                color: white;
-                font-size: 16px;
-                padding: 10px;
-                border-radius: 5px;
-                margin: 2px;
-                width: 200px;
-            }
-            QTabBar::tab:selected {
-                background: #2980B9;
-                font-weight: bold;
-            }
-        """)
+        self.tabs.setStyleSheet(tab_style())
 
         # Current Bills Tab
         self.current_bills_tab = QWidget()
@@ -81,7 +64,7 @@ class UtilityBillManagement(QWidget):
         self.current_bill_table.setColumnCount(4)
         self.current_bill_table.setHorizontalHeaderLabels(["Category", "Amount", "Due Date", "Download"])
         self.current_bill_table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
-        self.current_bill_table.setStyleSheet("background-color: #ECF0F1; border-radius: 10px;")
+        self.current_bill_table.setStyleSheet(table_style())
         self.current_bill_table.setEditTriggers(QTableWidget.NoEditTriggers)
 
         layout.addWidget(self.current_bill_table)
@@ -113,7 +96,7 @@ class UtilityBillManagement(QWidget):
         self.previous_bill_table.setColumnCount(4)
         self.previous_bill_table.setHorizontalHeaderLabels(["Category", "Amount", "Paid Date", "Download"])
         self.previous_bill_table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
-        self.previous_bill_table.setStyleSheet("background-color: #ECF0F1; border-radius: 10px;")
+        self.previous_bill_table.setStyleSheet(table_style())
         self.previous_bill_table.setEditTriggers(QTableWidget.NoEditTriggers)
 
         layout.addWidget(self.previous_bill_table)
@@ -124,17 +107,20 @@ class UtilityBillManagement(QWidget):
         self.previous_bills_tab.setLayout(layout)
 
     def load_current_bills_data(self):
-        sample_data = [
-            ["Electricity", "$120", "2025-01-15"],
-            ["Water", "$45", "2025-01-20"],
-            ["Gas", "$70", "2025-01-25"]
-        ]
+        fetched_data = load_current_bills_data(globals.get_user_id())
 
-        self.current_bill_table.setRowCount(len(sample_data))
-        for row, data in enumerate(sample_data):
-            for col, value in enumerate(data):
-                item = QTableWidgetItem(value)
-                self.current_bill_table.setItem(row, col, item)
+        if not fetched_data or len(fetched_data) == 0:
+            return
+        print(fetched_data)
+        self.current_bill_table.setRowCount(len(fetched_data))
+        for row, data in enumerate(fetched_data):
+            bt = QTableWidgetItem(data[0])          # bill type
+            dd = QTableWidgetItem(data[1].strftime('%Y-%m-%d')) # due date 
+            de = QTableWidgetItem(f"{data[2]:,.2f}") # bill amount
+                 
+            self.current_bill_table.setItem(row, 0, bt)
+            self.current_bill_table.setItem(row, 1, de)
+            self.current_bill_table.setItem(row, 2, dd)
 
             download_button = QPushButton("Download")
             download_button.setStyleSheet(self.button_style())
@@ -173,7 +159,7 @@ class UtilityBillManagement(QWidget):
     def button_style(self):
         return """
             QPushButton {
-                background-color: #3498DB;
+                background-color: #27AE60;
                 color: white;
                 font-size: 14px;
                 font-weight: bold;
@@ -181,7 +167,7 @@ class UtilityBillManagement(QWidget):
                 border-radius: 5px;
             }
             QPushButton:hover {
-                background-color: #2980B9;
+                background-color: #229954;
             }
         """
 

@@ -1,6 +1,10 @@
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import Qt
 
+from PyQt5.QtWidgets import *
+from PyQt5.QtCore import Qt
+
+
 class AddDocumentPopup(QDialog):
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -8,6 +12,11 @@ class AddDocumentPopup(QDialog):
         self.setGeometry(100, 100, 450, 450)
         self.setStyleSheet("background-color: white;")
         self.init_ui()
+
+        # Store values for later access
+        self.file_name = ""
+        self.file_path = ""
+        self.category = ""
 
     def init_ui(self):
         layout = QVBoxLayout()
@@ -34,7 +43,7 @@ class AddDocumentPopup(QDialog):
         self.file_input.setPlaceholderText("Select file...")
         self.file_input.setReadOnly(True)
         self.style_input(self.file_input)
-        
+
         browse_button = QPushButton("Browse")
         self.style_button_primary(browse_button)
         browse_button.clicked.connect(self.browse_file)
@@ -153,6 +162,10 @@ class AddDocumentPopup(QDialog):
         if binary_data:
             self.status_label.setText(f"Document '{file_name}' uploaded successfully under category '{category}'.")
             self.status_label.setStyleSheet("font-size: 14px; color: green;")
+            self.file_name = file_name
+            self.file_path = file_path
+            self.category = category
+            self.accept()  # Close the dialog and accept the values
         else:
             self.status_label.setText("Failed to read the document.")
 
@@ -163,6 +176,9 @@ class AddDocumentPopup(QDialog):
         except Exception as e:
             print(f"Error reading file: {e}")
             return None
+
+    def get_document_info(self):
+        return self.file_name, self.file_path, self.category
 
 
 if __name__ == "__main__":

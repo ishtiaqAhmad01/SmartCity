@@ -1,132 +1,165 @@
-create database UCSP;
-use UCSP;
-
 CREATE TABLE users (
-    user_id INT AUTO_INCREMENT PRIMARY KEY,
-    first_name VARCHAR(100),
-    last_name VARCHAR(100),
-    email VARCHAR(255) UNIQUE,
-    phone_number VARCHAR(20),
-    address TEXT,
-    password_hash VARCHAR(255)
+  CNIC varchar(15) NOT NULL,
+  first_name varchar(100) NOT NULL,
+  last_name varchar(100),
+  email varchar(255) NOT NULL unique,
+  phone_number varchar(20) NOT NULL unique,
+  pic longblob,
+  dob date NOT NULL,
+  gender enum('male', 'female') NOT NULL,
+  password_hash varchar(255) NOT NULL,
+  PRIMARY KEY (CNIC)
 );
 
-CREATE TABLE statuses (
-    status_id INT AUTO_INCREMENT PRIMARY KEY,
-    status_name VARCHAR(50) -- e.g., Pending, In Progress, Resolved
+
+
+CREATE TABLE documents (
+  document_id int NOT NULL auto_increment,
+  cnic varchar(255) NOT NULL,
+  document_name varchar(255) NOT NULL,
+  document_ext varchar(50) NOT NULL,
+  document_type varchar(255) NOT NULL,
+  encrypted tinyint NOT NULL,
+  upload_date timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  doc longblob not null,
+  PRIMARY KEY (document_id),
+  FOREIGN KEY (cnic) REFERENCES users(CNIC)
 );
 
-CREATE TABLE complaints (
-    complaint_id INT AUTO_INCREMENT PRIMARY KEY,
-    user_id INT,
-    category VARCHAR(100),
-    description TEXT,
-    location VARCHAR(255),
-    status_id INT,
-    complaint_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users(user_id),
-    FOREIGN KEY (status_id) REFERENCES statuses(status_id)
+
+CREATE TABLE complains (
+  complain_id int NOT NULL auto_increment,
+  cnic varchar(255) NOT NULL,
+  main_category TEXT NOT NULL,
+  sub_category varchar(255),
+  description TEXT NOT NULL,
+  date DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  address varchar(255) NOT NULL,
+  status varchar(50) NOT NULL default 'pending',
+
+  FOREIGN KEY (cnic) REFERENCES users(CNIC),
+  PRIMARY KEY (complain_id)
+);
+
+
+CREATE TABLE payments (
+  payment_id int NOT NULL auto_increment,
+  bill_id int NOT NULL,
+  payment_date timestamp NOT NULL,
+  payment_amount decimal NOT NULL,
+  payment_status varchar(50) NOT NULL,
+  PRIMARY KEY (payment_id)
+);
+
+
+CREATE TABLE Admin (
+  CNIC varchar(15),
+  name varchar(100) NOT NULL,
+  email varchar(255) NOT NULL unique,
+  phone_number varchar(20) NOT NULL unique,
+  password_hash varchar(255) NOT NULL,
+  address varchar(255),
+  PRIMARY KEY (CNIC)
+);
+
+
+
+CREATE TABLE routes (
+  route_id int NOT NULL auto_increment,
+  route_number varchar(50) NOT NULL,
+  start_location varchar(255) NOT NULL,
+  end_location varchar(255) NOT NULL,
+  distance decimal NOT NULL,
+  duration time NOT NULL,
+  PRIMARY KEY (route_id),
+  KEY AK (route_number)
 );
 
 CREATE TABLE feedback (
-    feedback_id INT AUTO_INCREMENT PRIMARY KEY,
-    complaint_id INT,
-    user_id INT,
-    rating INT, -- rating out of 5
-    comments TEXT,
-    feedback_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (complaint_id) REFERENCES complaints(complaint_id),
-    FOREIGN KEY (user_id) REFERENCES users(user_id)
+  feedback_id int NOT NULL auto_increment,
+  refer_id varchar(255) NOT NULL,
+  refer_type enum('appointment', 'complain') NOT NULL,
+  feedback_text TEXT NOT NULL,
+  feedback_date DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  feedback_rating int NOT NULL,
+  PRIMARY KEY (feedback_id)
 );
 
 
-CREATE TABLE transport_routes (
-    route_id INT AUTO_INCREMENT PRIMARY KEY,
-    origin VARCHAR(255),
-    destination VARCHAR(255),
-    schedule_time TIME,
-    transport_type VARCHAR(50) -- e.g., Train, Bus
+CREATE TABLE Appointments (
+  user_cnic varchar(255) NOT NULL,
+  service varchar(255) NOT NULL,
+  location varchar(255) NOT NULL,
+  booking_date date NOT NULL,
+  time timestamp NOT NULL,
+  status varchar(50) NOT NULL,
+  FOREIGN KEY (user_cnic) REFERENCES users(CNIC)
+);
+
+CREATE TABLE utility_bills (
+  bill_id INT NOT NULL AUTO_INCREMENT,          
+  user_cnic VARCHAR(15) NOT NULL,              
+  bill_type VARCHAR(50) NOT NULL,              
+  issue_date DATE NOT NULL,                     
+  due_date DATE NOT NULL,                       
+  amount_before_due DECIMAL(10, 2) NOT NULL,    
+  tax_percentage DECIMAL(5, 2) NOT NULL,        
+  tax_amount DECIMAL(10, 2) NOT NULL,          
+  late_fee DECIMAL(10, 2) NOT NULL,            
+  amount_after_due DECIMAL(10, 2) NOT NULL,    
+  status ENUM('pending', 'paid') DEFAULT 'pending' NOT NULL,
+  FOREIGN KEY (user_cnic) REFERENCES users(CNIC), 
+  PRIMARY KEY (bill_id)
+);
+
+
+
+CREATE TABLE complaint_resolution (
+  resolution_id int NOT NULL auto_increment,
+  complain_id int NOT NULL,
+  resolved_by_user_cnic varchar(255) NOT NULL,
+  resolved_at date NOT NULL,
+  PRIMARY KEY (resolution_id)
+);
+
+CREATE TABLE vehicles (
+  vehicle_id int NOT NULL auto_increment,
+  vehicle_number varchar(50) NOT NULL,
+  vehicle_type varchar(255) NOT NULL,
+  capacity int NOT NULL,
+  status enum('active', 'inactive', 'maintenance') NOT NULL,
+  PRIMARY KEY (vehicle_id),
+  KEY AK (vehicle_number)
+);
+
+CREATE TABLE trips (
+  trip_id int NOT NULL auto_increment,
+  vehicle_id int NOT NULL,
+  route_id int NOT NULL,
+  trip_date date NOT NULL,
+  departure_time datetime NOT NULL,
+  status enum('scheduled', 'in-progress', 'completed', 'cancelled') NOT NULL,
+  PRIMARY KEY (trip_id),
+  FOREIGN KEY (route_id) REFERENCES routes(route_id),
+  FOREIGN KEY (vehicle_id) REFERENCES vehicles(vehicle_id)
+);
+
+CREATE TABLE address (
+  cnic varchar(15) NOT NULL,
+  province varchar(100) NOT NULL,
+  district varchar(100) NOT NULL,
+  city varchar(100) NOT null
 );
 
 
 CREATE TABLE bookings (
-    booking_id INT AUTO_INCREMENT PRIMARY KEY,
-    user_id INT,
-    route_id INT,
-    booking_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    seat_number INT,
-    FOREIGN KEY (user_id) REFERENCES users(user_id),
-    FOREIGN KEY (route_id) REFERENCES transport_routes(route_id)
+  booking_id int NOT NULL auto_increment,
+  trip_id int NOT NULL,
+  cnic varchar(20) NOT NULL,
+  seat_number varchar(10) NOT NULL,
+  booking_date datetime NOT NULL,
+  status enum('confirmed', 'pending', 'cancelled') NOT NULL,
+  PRIMARY KEY (booking_id),
+  FOREIGN KEY (trip_id) REFERENCES trips(trip_id),
+  FOREIGN KEY (cnic) REFERENCES users(CNIC)
 );
-
-
-CREATE TABLE tickets (
-    ticket_id INT AUTO_INCREMENT PRIMARY KEY,
-    booking_id INT,
-    ticket_number VARCHAR(100) UNIQUE,
-    e_receipt TEXT,
-    FOREIGN KEY (booking_id) REFERENCES bookings(booking_id)
-);
-
-
-CREATE TABLE utility_bills (
-    bill_id INT AUTO_INCREMENT PRIMARY KEY,
-    user_id INT,
-    bill_type VARCHAR(50), -- e.g., Electricity, Water, Gas
-    bill_amount DECIMAL(10, 2),
-    due_date DATE,
-    bill_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users(user_id)
-);
-
-CREATE TABLE payments (
-    payment_id INT AUTO_INCREMENT PRIMARY KEY,
-    bill_id INT,
-    user_id INT,
-    payment_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    payment_amount DECIMAL(10, 2),
-    payment_status VARCHAR(50), -- e.g., Paid, Pending
-    FOREIGN KEY (bill_id) REFERENCES utility_bills(bill_id),
-    FOREIGN KEY (user_id) REFERENCES users(user_id)
-);
-
-
-CREATE TABLE services (
-    service_id INT AUTO_INCREMENT PRIMARY KEY,
-    service_name VARCHAR(100),
-    description TEXT
-);
-
-
-CREATE TABLE appointments (
-    appointment_id INT AUTO_INCREMENT PRIMARY KEY,
-    user_id INT,
-    service_id INT,
-    appointment_date DATE,
-    appointment_time TIME,
-    status VARCHAR(50), -- e.g., Scheduled, Completed, Cancelled
-    FOREIGN KEY (user_id) REFERENCES users(user_id),
-    FOREIGN KEY (service_id) REFERENCES services(service_id)
-);
-
-CREATE TABLE documents (
-    document_id INT AUTO_INCREMENT PRIMARY KEY,
-    user_id INT,
-    document_name VARCHAR(255),
-    document_type VARCHAR(50), -- e.g., CNIC, Utility Bill
-    document_path VARCHAR(255), -- Path to stored document
-    encrypted BOOLEAN DEFAULT FALSE,
-    upload_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users(user_id)
-);
-
-
-
-
-
-
-
-
-
-
-

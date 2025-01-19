@@ -1,7 +1,12 @@
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import Qt
 from page1_form import AddComplaintDialog
-from user_database import delete_complaint_from_db
+from user_database import delete_complaint_from_db, insert_complain_to_db,load_complains_from_db, add_review_of_complain
+from functions import table_style
+import globals
+from feedback import FeedbackDialog
+
+
 
 
 class Page1(QWidget):
@@ -46,21 +51,7 @@ class Page1(QWidget):
         self.complaint_table.setColumnCount(4)
         self.complaint_table.setHorizontalHeaderLabels(["Complaint ID", "Description", "Status", "Action"])
         self.complaint_table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
-        self.complaint_table.setStyleSheet("""
-            QTableWidget {
-                background-color: #ECF0F1;
-                border: 1px solid #BDC3C7;
-                border-radius: 10px;
-                font-size: 14px;
-            }
-            QHeaderView::section {
-                background-color: #3498DB;
-                color: white;
-                font-weight: bold;
-                border: 1px solid #2980B9;
-                padding: 5px;
-            }
-        """)
+        self.complaint_table.setStyleSheet(table_style())
         self.complaint_table.setEditTriggers(QAbstractItemView.NoEditTriggers)
 
         # Load initial placeholder data
@@ -75,17 +66,19 @@ class Page1(QWidget):
         dialog = AddComplaintDialog()
         if dialog.exec_() == QDialog.Accepted:
             main_category, sub_category, description, address = dialog.get_data()
-            QMessageBox.information(self, "Complaint Added", f"Complaint Details:\nCategory: {main_category}\nSubcategory: {sub_category}\nDescription: {description}\nAddress: {address}")
-            
-            self.load_complaints()
-
+            if insert_complain_to_db(globals.get_user_id(), main_category, sub_category, description, address):
+                QMessageBox.information(self, "Complaint Added", f"Complaint Details:\nCategory: {main_category}\nSubcategory: {sub_category}\nDescription: {description}\nAddress: {address}")
+                self.load_complaints()
+            else:
+                QMessageBox.critical(self, "Error", "There Was Error While Inserting Complain")
+        
     def load_complaints(self):
-        data = [
-            [1, "Street light not working", "Pending"],
-            [2, "Potholes on main road", "Resolved"],
-            [3, "Garbage collection delayed", "Pending"],
-        ]
+        data = load_complains_from_db(globals.get_user_id())
         self.complaint_table.setRowCount(len(data))
+
+        if len(data)==0:
+            return
+
         for row, complaint in enumerate(data):
             for col, value in enumerate(complaint):
                 item = QTableWidgetItem(str(value))
@@ -95,10 +88,10 @@ class Page1(QWidget):
             status = complaint[2]
             btn = QPushButton("")
 
-            if status == "Pending":
+            if status == "pending":
                 btn.setText("Cancel")
                 btn.setStyleSheet(self.btn_style("#E74C3C","#C0392B"))
-            elif status == "Resolved":
+            elif status == "resolved":
                 btn.setText("Feedback")
                 btn.setStyleSheet(self.btn_style("#27AE60","#229954"))
             btn.clicked.connect(lambda _, r=row: self.btn_action(r))
@@ -122,10 +115,21 @@ class Page1(QWidget):
         complaint_id = self.complaint_table.item(row, 0).text()
         complaint_status = self.complaint_table.item(row, 2).text()
 
-        if complaint_status == "Pending":
-            QMessageBox.information(self, "Cancel Action", f"Cancel action for Complaint ID: {complaint_id}")
-            delete_complaint_from_db(complaint_id)
-            
-        elif complaint_status == "Resolved":
-            QMessageBox.information(self, "Feedback Action", f"Feedback action for Complaint ID: {complaint_id}")
+        print(complaint_status)
 
+        if complaint_status == "pending":
+            QMessageBox.information(self, "Cancel Action", f"Cancel action for Complaint ID: {complaint_id}")
+            if delete_complaint_from_db(complaint_id):
+                QMessageBox.information(self, "Success", "Complain has been removed.")
+            else:
+                QMessageBox.critical(self, "Error", "Complain can not be removed, Try Again.")
+            
+        elif complaint_status == "resolved":
+            feedback_dialog = FeedbackDialog()
+            if feedback_dialog.exec_() == QDialog.Accepted:
+                feedback, rating = feedback_dialog.get_feedback()
+                add_review_of_complain(complaint_id, feedback, rating)
+                delete_complaint_from_db(complaint_id) # also delete as we have provided feedback
+                QMessageBox.information(self, "Success", "Your feedback has been submitted.")
+        
+        self.load_complaints()
