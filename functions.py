@@ -386,25 +386,26 @@ def binary_as_doc(binary_data, output_path):
 
 def offices(type):
     offices = {
-    "Passport Renewal": [
-        "Garden Town",
-        "Shalimar",
-        "Raiwind",
-        "Defence (DHA)",
-        "Shahdrah"
-    ],
-    "CNIC Issuance": [
-        "Allama Iqbal Town",
-        "DHA Phase 1",
-        "Township",
-        "DHA Phase 4",
-        "Data Gunj Buksh",
-        "Edgerton Road"
-    ],
-    "Driver's License": [
-        "Farid Kot Road"
-    ]
-}
+        "Passport Renewal": [
+            "Garden Town",
+            "Shalimar",
+            "Raiwind",
+            "Defence (DHA)",
+            "Shahdrah"
+        ],
+        "CNIC Issuance": [
+            "Allama Iqbal Town",    
+            "DHA Phase 1",
+            "Township",
+            "DHA Phase 4",
+            "Data Gunj Buksh",
+            "Edgerton Road"
+        ],
+        "Driver's License": [
+            "Farid Kot Road"
+        ]
+    }
+    return offices[type]
 
 
 

@@ -1,4 +1,4 @@
-logined_cnic = '3660245605291'
+logined_cnic = None
 
 def set_user_id(user):
     global logined_cnic

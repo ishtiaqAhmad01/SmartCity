@@ -10,7 +10,6 @@ connection = pymysql.connect(
 )
 
 def check_user_cnic_password(cnic, password): #Done
-    cursor = connection.cursor()
     with connection.cursor() as cursor:
         query = "SELECT password_hash FROM USERS WHERE CNIC = %s"
         cursor.execute(query, (cnic,))
@@ -364,7 +363,31 @@ def update_complain_status(complain_id):
     except Exception as e:
         print(e)
 
+def insert_appointmnet(user_cnic, service, location, status, booking_date):
+    try:
+        with connection.cursor() as cursor:
+            query = """
+            insert into Appointments(user_cnic, service, location, status, booking_date)
+            values
+            (%s, %s, %s, %s, %s)
+            """
+            cursor.execute(query, (user_cnic, service, location, status, booking_date))
+            connection.commit()
+    except Exception as e:
+        print(e)
 
+def get_appointmnets(cnic):
+    try:
+        with connection.cursor() as cursor:
+            query = """
+            select * from Appointments where user_cnic = %s
+            """
+            cursor.execute(query, (cnic,))
+            cursor.fetchall()
+    except Exception as e:
+        print(e)
+        return ()
+        
 
 if __name__ == "__main__":
     # First_Name = 'ISHTIAQ'
@@ -382,7 +405,8 @@ if __name__ == "__main__":
     # Picture = 'C:/Users/ISHTIAQ/Downloads/Ishtiaq (2).jpg'
     # print(get_bill_info(cnic, "Electric"))
     # print(get_bill_id(cnic, 'Electric'))
-    print(get_feedback('complain', 9))
+    # print(get_feedback('complain', 9))
+    print(get_appointmnets('3660245605291'))
 
 
 

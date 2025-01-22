@@ -12,7 +12,6 @@ CREATE TABLE users (
 );
 
 
-
 CREATE TABLE documents (
   document_id int NOT NULL auto_increment,
   cnic varchar(255) NOT NULL,
@@ -39,7 +38,6 @@ CREATE TABLE complains (
   FOREIGN KEY (cnic) REFERENCES users(CNIC),
   PRIMARY KEY (complain_id)
 );
-
 
 
 CREATE TABLE payments (
@@ -74,6 +72,7 @@ CREATE TABLE routes (
   PRIMARY KEY (route_id)
 );
 
+
 CREATE TABLE feedback (
   feedback_id int NOT NULL auto_increment,
   refer_id varchar(255) NOT NULL,
@@ -86,16 +85,19 @@ CREATE TABLE feedback (
 
 
 
-
 CREATE TABLE Appointments (
+  id int PRIMARY key AUTO_INCREMENT,
   user_cnic varchar(255) NOT NULL,
   service varchar(255) NOT NULL,
   location varchar(255) NOT NULL,
   booking_date date NOT NULL,
-  time timestamp NOT NULL,
+  time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   status varchar(50) NOT NULL,
   FOREIGN KEY (user_cnic) REFERENCES users(CNIC)
-);
+); 
+
+select * from Appointments where user_cnic = '3660245605291'
+
 
 CREATE TABLE utility_bills (
   bill_id INT NOT NULL AUTO_INCREMENT,          
@@ -114,23 +116,6 @@ CREATE TABLE utility_bills (
 );
 
 
-CREATE TABLE complaint_resolution (
-  resolution_id int NOT NULL auto_increment,
-  complain_id int NOT NULL,
-  resolved_by_user_cnic varchar(255) NOT NULL,
-  resolved_at date NOT NULL,
-  PRIMARY KEY (resolution_id)
-);
-
-CREATE TABLE vehicles (
-  vehicle_id int NOT NULL auto_increment,
-  vehicle_number varchar(50) NOT NULL,
-  vehicle_type varchar(255) NOT NULL,
-  capacity int NOT NULL,
-  status enum('active', 'inactive', 'maintenance') NOT NULL,
-  PRIMARY KEY (vehicle_id)
-);
-
 CREATE TABLE trips (
   trip_id int NOT NULL auto_increment,
   vehicle_id int NOT NULL,
@@ -139,8 +124,7 @@ CREATE TABLE trips (
   departure_time datetime NOT NULL,
   status enum('scheduled', 'in-progress', 'completed', 'cancelled') NOT NULL,
   PRIMARY KEY (trip_id),
-  FOREIGN KEY (route_id) REFERENCES routes(route_id),
-  FOREIGN KEY (vehicle_id) REFERENCES vehicles(vehicle_id)
+  FOREIGN KEY (route_id) REFERENCES routes(route_id)
 );
 
 CREATE TABLE address (
@@ -149,7 +133,6 @@ CREATE TABLE address (
   district varchar(100) NOT NULL,
   city varchar(100) NOT null
 );
-
 
 CREATE TABLE bookings (
   booking_id int NOT NULL auto_increment,

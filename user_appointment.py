@@ -1,7 +1,9 @@
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import Qt, QDate
-from functions import table_style, tab_style
-
+from functions import table_style, tab_style, offices
+from database import insert_appointmnet, get_appointmnets
+from globals import get_user_id
+from datetime import datetime
 
 class AppointmentBooking(QWidget):
     def __init__(self):
@@ -40,11 +42,12 @@ class AppointmentBooking(QWidget):
         
         self.service_dropdown = QComboBox()
         self.service_dropdown.addItems(["Passport Renewal", "CNIC Issuance", "Driver's License"])
+        self.service_dropdown.currentTextChanged.connect(self.update_locations)
         form_layout.addRow("Service:", self.service_dropdown)
 
         
         self.location_dropdown = QComboBox()
-        self.location_dropdown.addItems(["City Hall", "Regional Office", "Downtown Office"])
+        self.location_dropdown.addItems(offices(self.service_dropdown.currentText()))
         form_layout.addRow("Location:", self.location_dropdown)
 
         
@@ -67,7 +70,6 @@ class AppointmentBooking(QWidget):
 
         
         button_layout = QHBoxLayout()
-
         self.confirm_button = QPushButton("Confirm Appointment")
         self.confirm_button.setStyleSheet("""
             QPushButton {
@@ -81,13 +83,17 @@ class AppointmentBooking(QWidget):
                 background-color: #229954;
             }
         """)
-        self.confirm_button.clicked.connect(self.confirm_appointment)
+        self.confirm_button.clicked.connect(self.save_appointment)
         button_layout.addWidget(self.confirm_button)
 
         layout.addLayout(button_layout)
 
         
         self.tab_widget.addTab(new_appointment_tab, "New Appointment")
+
+    def update_locations(self):
+        self.location_dropdown.clear()
+        self.location_dropdown.addItems(offices(self.service_dropdown.currentText()))
 
     def init_appointment_history_tab(self):
         history_tab = QWidget()
@@ -106,36 +112,32 @@ class AppointmentBooking(QWidget):
         self.tab_widget.addTab(history_tab, "Appointment History")
 
 
-        self.load_appointments()
+        self.populate_appointment_table()
 
-    def confirm_appointment(self):
-        """Confirm a new appointment and save to the database."""
+    def save_appointment(self):
         service = self.service_dropdown.currentText()
         location = self.location_dropdown.currentText()
         date = self.date_picker.date().toString("yyyy-MM-dd")
         time_slot = self.time_slot_dropdown.currentText()
         notes = self.notes_input.toPlainText()
+        time_24hr = datetime.strptime(time_slot, "%I:%M %p").strftime("%H:%M:%S")
+        try:
+            insert_appointmnet(get_user_id(), service, location, 'Upcoming', date)
+            QMessageBox.information(self, "Success", "Appointment is added to Sucessfully")
+            self.populate_appointment_table()
+        except ExceptionGroup as e:
+            print(e)
 
-        # Placeholder: Save appointment to the database
-        self.save_appointment(service, location, date, time_slot, notes)
 
-    def save_appointment(self, service, location, date, time_slot, notes):
-        """Save the appointment to the database (Placeholder function)."""
-        print(f"Saving appointment: {service}, {location}, {date}, {time_slot}, {notes}")
-        pass  # Implement MySQL INSERT logic here
+    def populate_appointment_table(self):
+        data = get_appointmnets(get_user_id())
+        print(get_user_id())
+        print(data)
 
-    def load_appointments(self):
-        """Load appointments from the database (Placeholder function)."""
-        print("Loading appointments from the database...")
-        # Replace with MySQL SELECT logic
-        example_data = [
-            {"service": "Passport Renewal", "location": "City Hall", "date": "2025-01-15", "time": "10:00 AM", "status": "Upcoming"},
-            {"service": "CNIC Issuance", "location": "Regional Office", "date": "2025-01-10", "time": "12:00 PM", "status": "Completed"},
-        ]
-        self.populate_appointment_table(example_data)
+        if not data:
+            self.history_table.setRowCount(0)
+            return
 
-    def populate_appointment_table(self, data):
-        """Populate the appointment history table with data."""
         self.history_table.setRowCount(len(data))
         for row, appointment in enumerate(data):
             self.history_table.setItem(row, 0, QTableWidgetItem(appointment["service"]))
