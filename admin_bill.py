@@ -2,7 +2,7 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtCore import Qt, QDate
 import sys
 from functions import table_style, tab_style, line_edit_style_rounded, spin_box_style, send_bill_email
-from user_database import get_user_info, add_user_bill, get_bill_info
+from database import get_user_info, add_user_bill, get_bill_info
 from pdf import generate_utility_bill_pdf
 
 
@@ -138,11 +138,11 @@ class BillManagement(QWidget):
         """)
         
         
-        search_layout = QHBoxLayout()
-        search_layout.addWidget(bill_type_label)
-        search_layout.addWidget(bill_type_dropdown)
-        search_layout.addWidget(self.search_field)
-        search_layout.addWidget(search_button)
+        self.search_layout = QHBoxLayout()
+        self.search_layout.addWidget(bill_type_label)
+        self.search_layout.addWidget(bill_type_dropdown)
+        self.search_layout.addWidget(self.search_field)
+        self.search_layout.addWidget(search_button)
 
         
         bill_info_group = QGroupBox("Bill Information")
@@ -191,22 +191,22 @@ class BillManagement(QWidget):
                 background-color: #0056b3;
             }
         """)
-        save_pdf_button.clicked.connect(self.save_searched_pdf)
+        save_pdf_button.clicked.connect(lambda: self.save_searched_pdf())
         save_pdf_button.setVisible(False)  
 
-        # Main Layout Configuration
-        main_layout.addLayout(search_layout)
+
+        main_layout.addLayout(self.search_layout)
         main_layout.addWidget(bill_info_group)
         main_layout.addWidget(save_pdf_button)
         main_layout.addStretch()
         tab.setLayout(main_layout)
 
-        # Connect search button to action
+
         search_button.clicked.connect(lambda: self.display_bill_info(bill_info_group, save_pdf_button))
 
         return tab
 
-    def display_bill_info(self, group_box, save_button): # TBD
+    def display_bill_info(self, group_box, save_button):
         print("called")
         bill_type = self.bill_type_dropdown.currentText()
         cnic = self.search_field.text()
@@ -214,32 +214,31 @@ class BillManagement(QWidget):
         data =  get_bill_info(cnic, bill_type)
         print(data)
         if data and len(data)!=0:
-            first_name, last_name, email, province, district, city, phone_number ,tax_percentage ,tax_amount  ,amount_before_due = data
+            first_name, last_name, email, province, district, city, phone_number ,tax_percentage ,tax_amount  ,amount_before_due, late_fee, issue_date, due_date = data
         else:
-            first_name = ""
-            last_name = ""
-            email = ""
-            province = ""
-            district = ""
-            city = ""
-            phone_number = ""
-            tax_percentage = ""
-            tax_amount = ""
-            amount_before_due = ""
+            first_name = "NA"
+            last_name = "NA"
+            email = "NA"
+            province = "NA"
+            district = "NA"
+            city = "NA"
+            phone_number = "NA"
+            tax_percentage = "NA"
+            tax_amount = "NA"
+            amount_before_due = "NA"
         
-        sample_data = {
+        self.bill_data = {
             "User Name": first_name +" "+ last_name,
             "Address": f'city : {city} | district : {district} | province : {province}',
             "Email": email,
             "Phone No": phone_number,
-            "Tax Percentage": tax_percentage,
-            "Tax Amount": tax_amount,
-            "Bill Amount": amount_before_due
+            "Tax Percentage": str(tax_percentage),
+            "Tax Amount": str(tax_amount),
+            "Bill Amount": str(amount_before_due)
         }
         
-        # Populate fields with data
         for label, field in self.bill_details.items():
-            field.setText(sample_data[label])
+            field.setText(self.bill_data[label])
 
         # Show data and save button
         group_box.setVisible(True)
@@ -309,9 +308,22 @@ class BillManagement(QWidget):
         else:
             QMessageBox.critical(self, "Error", "Failed to add bill")
 
-    def save_searched_pdf(self, cnic):
-        self.search_field.text()
-        QMessageBox.information(self, "Not Implemented", "This Funtion is not implemneted yet.")
+    def save_searched_pdf(self):
+        cnic = self.search_field.text()
+        bill_type = self.bill_type_dropdown.currentText()
+        first_name, last_name, email, province, district, city, phone_number ,tax_percentage ,tax_amount  ,amount_before_due, late_fee, issue_date, due_date = get_bill_info(cnic, bill_type)
+        bill_info = {
+            "user_cnic": cnic,
+            "bill_type": bill_type,
+            "issue_date": "2025-01-01",
+            "due_date": "2025-01-15",
+            "amount_before_due": amount_before_due,
+            "tax_percentage": tax_percentage, 
+            "tax_amount": tax_amount, 
+            "late_fee":late_fee,   
+            "amount_after_due": amount_before_due + late_fee  
+        }
+        generate_utility_bill_pdf("searched_bill_pdf.pdf",bill_info)
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)

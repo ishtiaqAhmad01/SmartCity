@@ -1,6 +1,7 @@
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import Qt
 from functions import majorProblem_to_subProblem, table_style
+from database import get_feedback, get_comlpains, update_complain_status
 
 class AdminPage(QWidget):
     def __init__(self):
@@ -34,11 +35,15 @@ class AdminPage(QWidget):
         self.setLayout(layout)
 
     def load_complaints(self):
-        data = [
-            [1, "Electrical", "Street light not working", "Pending"],
-            [2, "Plumbing", "Potholes on main road", "Resolved"],
-            [3, "Garbage", "Garbage collection delayed", "Pending"],
-        ]
+        data = get_comlpains()
+        print(data)
+        if len(data)==0:
+            self.complaint_table.setRowCount(0)
+            return
+            
+        
+
+
         self.complaint_table.setRowCount(len(data))
         for row, complaint in enumerate(data):
             for col, value in enumerate(complaint):
@@ -47,14 +52,14 @@ class AdminPage(QWidget):
                 self.complaint_table.setItem(row, col, item)
 
             status = complaint[3]
-            btn = QPushButton("")
+            btn = QPushButton("Action")
 
-            if status == "Pending":
+            if status == "pending":
                 btn.setText("Resolve")
-                btn.setStyleSheet(self.btn_style("#27AE60","#229954"))
-            elif status == "Resolved":
+                btn.setStyleSheet(self.btn_style("#eb4034"," #bf342a"))
+            else:
                 btn.setText("Feedback")
-                btn.setStyleSheet(self.btn_style("#3498DB","#2980B9"))
+                btn.setStyleSheet(self.btn_style("#27AE60","#229954"))
             
             btn.clicked.connect(lambda _, r=row: self.btn_action(r))
             self.complaint_table.setCellWidget(row, 4, btn)
@@ -77,21 +82,23 @@ class AdminPage(QWidget):
         complaint_id = self.complaint_table.item(row, 0).text()
         complaint_status = self.complaint_table.item(row, 3).text()
 
-        if complaint_status == "Pending":
+        if complaint_status == "pending":
             self.resolve_complaint(complaint_id)
-        elif complaint_status == "Resolved":
-            self.collect_feedback(complaint_id)
+        else:
+            self.show_feedback(complaint_id)
 
     def resolve_complaint(self, complaint_id):
-        # Logic for resolving the complaint
+        update_complain_status(complaint_id)
         QMessageBox.information(self, "Complaint Resolved", f"Complaint ID: {complaint_id} has been resolved.")
         self.load_complaints()
 
-    def collect_feedback(self, complaint_id):
-        # Logic for collecting feedback from user
-        feedback_dialog = QInputDialog(self)
-        feedback, ok = feedback_dialog.getText(self, "Feedback", "Enter your feedback:")
-        if ok:
-            QMessageBox.information(self, "Feedback Collected", f"Feedback for Complaint ID: {complaint_id}: {feedback}")
-            self.load_complaints()
+    def show_feedback(self, complaint_id):
+        feedback = get_feedback('complain', complaint_id)
+        print(complaint_id)
+        if feedback:
+            text, rating, date = feedback
+            QMessageBox.information(self, "FeedBack", f" Review : {text} \n {'⭐'*rating} \n Date : {date}")
+        else:
+            QMessageBox.information(self, "Feedback", "")
+        
 

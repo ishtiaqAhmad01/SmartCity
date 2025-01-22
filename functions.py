@@ -1,6 +1,5 @@
 import re
 import bcrypt
-from random import randint
 import smtplib
 import random
 from email.mime.text import MIMEText
@@ -8,7 +7,6 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.base import MIMEBase
 from email import encoders
 import os
-
 
 def table_style():
     return """
@@ -157,7 +155,6 @@ def send_bill_email(to_email, pdf_path, bill_info):
         print(f"Error attaching PDF: {e}")
         return False
 
-    # Sending the email
     try:
         with smtplib.SMTP_SSL('smtp.gmail.com', 465) as server:
             server.login(sender_email, sender_password)
@@ -387,8 +384,31 @@ def binary_as_doc(binary_data, output_path):
     except Exception as e:
         print(f"An error occurred: {e}")
 
+def offices(type):
+    offices = {
+    "Passport Renewal": [
+        "Garden Town",
+        "Shalimar",
+        "Raiwind",
+        "Defence (DHA)",
+        "Shahdrah"
+    ],
+    "CNIC Issuance": [
+        "Allama Iqbal Town",
+        "DHA Phase 1",
+        "Township",
+        "DHA Phase 4",
+        "Data Gunj Buksh",
+        "Edgerton Road"
+    ],
+    "Driver's License": [
+        "Farid Kot Road"
+    ]
+}
+
+
+
 if __name__ == "__main__":
-    # Example Bill Information
     bill_info_example = {
         "bill_type": "Electricity",
         "amount_before_due": 5000.00,
@@ -398,17 +418,12 @@ if __name__ == "__main__":
         "due_date": "2025-01-15"
     }
 
-    # Path to the generated PDF
     pdf_path = "utility_bill_updated.pdf"
+    recipient_email = "ahmadziachaudhary44@gmail.com"
 
-    # Recipient email address
-    recipient_email = "s2023065078@umt.edu.pk"
-
-    # Send the email
     if send_bill_email(recipient_email, pdf_path, bill_info_example):
         print("Email sent successfully!")
     else:
         print("Failed to send email.")
-    # send_email('s2023065078@umt.edu.pk', '2354')
 
 

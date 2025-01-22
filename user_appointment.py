@@ -9,21 +9,21 @@ class AppointmentBooking(QWidget):
         self.init_ui()
 
     def init_ui(self):
-        # Main layout
+        
         layout = QVBoxLayout()
         layout.setContentsMargins(10, 10, 10, 10)
 
-        # Header
+        
         header = QLabel("Appointment Booking System")
         header.setAlignment(Qt.AlignCenter)
         header.setStyleSheet("font-size: 24px; font-weight: bold; color: #333;")
         layout.addWidget(header)
 
-        # Tab Widget
+        
         self.tab_widget = QTabWidget()
         self.tab_widget.setStyleSheet(tab_style())
 
-        # Initialize Tabs
+        
         self.init_new_appointment_tab()
         self.init_appointment_history_tab()
 
@@ -31,42 +31,41 @@ class AppointmentBooking(QWidget):
         self.setLayout(layout)
 
     def init_new_appointment_tab(self):
-        """Initialize the New Appointment tab."""
         new_appointment_tab = QWidget()
         layout = QVBoxLayout(new_appointment_tab)
 
-        # Form Layout
+        
         form_layout = QFormLayout()
 
-        # Service Selection
+        
         self.service_dropdown = QComboBox()
         self.service_dropdown.addItems(["Passport Renewal", "CNIC Issuance", "Driver's License"])
         form_layout.addRow("Service:", self.service_dropdown)
 
-        # Location Selection
+        
         self.location_dropdown = QComboBox()
         self.location_dropdown.addItems(["City Hall", "Regional Office", "Downtown Office"])
         form_layout.addRow("Location:", self.location_dropdown)
 
-        # Date Picker
+        
         self.date_picker = QDateEdit()
         self.date_picker.setCalendarPopup(True)
         self.date_picker.setDate(QDate.currentDate())
         form_layout.addRow("Appointment Date:", self.date_picker)
 
-        # Time Slot Selection
+        
         self.time_slot_dropdown = QComboBox()
         self.time_slot_dropdown.addItems(["10:00 AM", "12:00 PM", "2:00 PM", "4:00 PM"])
         form_layout.addRow("Time Slot:", self.time_slot_dropdown)
 
-        # Notes
+        
         self.notes_input = QTextEdit()
         self.notes_input.setPlaceholderText("Additional notes or reason for the appointment...")
         form_layout.addRow("Notes:", self.notes_input)
 
         layout.addLayout(form_layout)
 
-        # Action Buttons
+        
         button_layout = QHBoxLayout()
 
         self.confirm_button = QPushButton("Confirm Appointment")
@@ -87,15 +86,14 @@ class AppointmentBooking(QWidget):
 
         layout.addLayout(button_layout)
 
-        # Add New Appointment tab to the tab widget
+        
         self.tab_widget.addTab(new_appointment_tab, "New Appointment")
 
     def init_appointment_history_tab(self):
-        """Initialize the Appointment History tab."""
         history_tab = QWidget()
         layout = QVBoxLayout(history_tab)
 
-        # Table for Appointment History
+        
         self.history_table = QTableWidget()
         self.history_table.setColumnCount(6)
         self.history_table.setHorizontalHeaderLabels(
@@ -105,10 +103,9 @@ class AppointmentBooking(QWidget):
         self.history_table.setStyleSheet(table_style())
         layout.addWidget(self.history_table)
 
-        # Add Appointment History tab to the tab widget
         self.tab_widget.addTab(history_tab, "Appointment History")
 
-        # Load data from the database
+
         self.load_appointments()
 
     def confirm_appointment(self):

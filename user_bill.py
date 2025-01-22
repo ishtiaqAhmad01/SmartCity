@@ -3,7 +3,9 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QFont
 from functions import table_style, tab_style
-from user_database import load_current_bills_data
+from database import load_current_bills_data, get_bill_info, update_bill_status, get_bill_id, insertPayment
+from pdf import generate_utility_bill_pdf
+from payments import PaymentPopup
 import globals
 
 class UtilityBillManagement(QWidget):
@@ -45,7 +47,7 @@ class UtilityBillManagement(QWidget):
     def init_current_bills_tab(self):
         layout = QVBoxLayout()
 
-        # Filter Section
+    
         filter_layout = QHBoxLayout()
         category_label = QLabel("Filter by Category:")
         category_label.setFont(QFont("Arial", 14))
@@ -69,7 +71,7 @@ class UtilityBillManagement(QWidget):
 
         layout.addWidget(self.current_bill_table)
 
-        # Load Sample Data for Current Bills
+        
         self.load_current_bills_data()
 
         self.current_bills_tab.setLayout(layout)
@@ -101,44 +103,90 @@ class UtilityBillManagement(QWidget):
 
         layout.addWidget(self.previous_bill_table)
 
-        # Load Sample Data for Previous Bills
         self.load_previous_bills_data()
 
         self.previous_bills_tab.setLayout(layout)
 
     def load_current_bills_data(self):
-        fetched_data = load_current_bills_data(globals.get_user_id())
+        fetched_data = load_current_bills_data(globals.get_user_id(), "pending")
 
         if not fetched_data or len(fetched_data) == 0:
             return
-        print(fetched_data)
+        
         self.current_bill_table.setRowCount(len(fetched_data))
         for row, data in enumerate(fetched_data):
-            bt = QTableWidgetItem(data[0])          # bill type
-            dd = QTableWidgetItem(data[1].strftime('%Y-%m-%d')) # due date 
-            de = QTableWidgetItem(f"{data[2]:,.2f}") # bill amount
-                 
+            bt = QTableWidgetItem(data[0]) # bill type
+            dd = QTableWidgetItem(data[1].strftime('%Y-%m-%d'))  # due date
+            de = QTableWidgetItem(f"{data[2]:,.2f}")  # bill amount
+
             self.current_bill_table.setItem(row, 0, bt)
             self.current_bill_table.setItem(row, 1, de)
             self.current_bill_table.setItem(row, 2, dd)
 
+            button_layout = QWidget()
+            button_hbox = QHBoxLayout()
+            button_hbox.setContentsMargins(0, 0, 0, 0)
+            button_layout.setStyleSheet("background-color: #ffffff;")
+            button_hbox.setSpacing(5)
+
+            # Download Button
             download_button = QPushButton("Download")
             download_button.setStyleSheet(self.button_style())
             download_button.clicked.connect(lambda _, r=row: self.download_bill(r, "current"))
-            self.current_bill_table.setCellWidget(row, 3, download_button)
+            button_hbox.addWidget(download_button)
+
+            # Pay Button
+            pay_button = QPushButton("Pay")
+            pay_button.setStyleSheet("""
+                QPushButton {
+                    background-color: #eb4034;
+                    color: white;
+                    font-size: 14px;
+                    font-weight: bold;
+                    padding: 5px;
+                    border-radius: 5px;
+                }
+                QPushButton:hover {
+                    background-color: #bf342a;
+                }
+            """)
+            pay_button.clicked.connect(lambda _, r=row: self.pay_bill(r))
+            button_hbox.addWidget(pay_button)
+
+            button_layout.setLayout(button_hbox)
+            self.current_bill_table.setCellWidget(row, 3, button_layout)
+
+    def pay_bill(self, row):
+        popup = PaymentPopup()
+        if popup.exec_() == QDialog.Accepted:  
+            QMessageBox.information(self, "Succes", "Payment was successful!")
+            bill_type = self.current_bill_table.item(row, 0).text()
+            cnic = globals.get_user_id()
+            id = get_bill_id(cnic, bill_type)[0]
+            amount = self.current_bill_table.item(row, 1).text()
+            insertPayment(id, amount) # insert in paymnets
+            update_bill_status(cnic, bill_type) # marking a bill prevoius
+
+            self.load_current_bills_data()
+            self.load_previous_bills_data()
+            
+        else:
+            QMessageBox.critical(self, "Error", "Payment failed.")
 
     def load_previous_bills_data(self):
-        sample_data = [
-            ["Electricity", "$110", "2024-12-15"],
-            ["Water", "$40", "2024-12-20"],
-            ["Gas", "$65", "2024-12-25"]
-        ]
+        fetched_data = load_current_bills_data(globals.get_user_id(), "paid")
 
-        self.previous_bill_table.setRowCount(len(sample_data))
-        for row, data in enumerate(sample_data):
-            for col, value in enumerate(data):
-                item = QTableWidgetItem(value)
-                self.previous_bill_table.setItem(row, col, item)
+        if not fetched_data or len(fetched_data) == 0:
+            return
+        self.previous_bill_table.setRowCount(len(fetched_data))
+        for row, data in enumerate(fetched_data):
+            bt = QTableWidgetItem(data[0]) # bill type
+            dd = QTableWidgetItem(data[1].strftime('%Y-%m-%d'))  # due date
+            de = QTableWidgetItem(f"{data[2]:,.2f}")  # bill amount
+
+            self.previous_bill_table.setItem(row, 0, bt)
+            self.previous_bill_table.setItem(row, 1, de)
+            self.previous_bill_table.setItem(row, 2, dd)
 
             download_button = QPushButton("Download")
             download_button.setStyleSheet(self.button_style())
@@ -153,9 +201,30 @@ class UtilityBillManagement(QWidget):
         filter_category = self.previous_filter_dropdown.currentText()
         QMessageBox.information(self, "Filter Applied", f"Filtering previous bills by category: {filter_category}")
 
-    def download_bill(self, row, bill_type):
-        QMessageBox.information(self, "Download Bill", f"Downloading bill from {bill_type} list, row: {row + 1}")
-
+    def download_bill(self, row, status):
+        cnic = globals.get_user_id()
+        if status == "current":
+            bill_type = self.current_bill_table.item(row, 0).text()
+        else:
+            bill_type = self.previous_bill_table.item(row, 0).text()
+        print(cnic, bill_type)
+        data = get_bill_info(cnic, bill_type)
+        print(data)
+        if data :
+            first_name, last_name, email, province, district, city, phone_number ,tax_percentage ,tax_amount  ,amount_before_due, late_fee, issue_date, due_date = data
+            bill_info = {
+                "user_cnic": cnic,
+                "bill_type": bill_type,
+                "issue_date": issue_date,
+                "due_date": due_date,
+                "amount_before_due": amount_before_due,
+                "tax_percentage": tax_percentage, 
+                "tax_amount": tax_amount, 
+                "late_fee":late_fee,   
+                "amount_after_due": amount_before_due + late_fee  
+            }
+            generate_utility_bill_pdf("download_bill_pdf.pdf",bill_info)
+    
     def button_style(self):
         return """
             QPushButton {

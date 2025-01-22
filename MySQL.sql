@@ -36,20 +36,20 @@ CREATE TABLE complains (
   date DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   address varchar(255) NOT NULL,
   status varchar(50) NOT NULL default 'pending',
-
   FOREIGN KEY (cnic) REFERENCES users(CNIC),
   PRIMARY KEY (complain_id)
 );
 
 
+
 CREATE TABLE payments (
   payment_id int NOT NULL auto_increment,
   bill_id int NOT NULL,
-  payment_date timestamp NOT NULL,
+  payment_date timestamp DEFAULT CURRENT_TIMESTAMP ,
   payment_amount decimal NOT NULL,
-  payment_status varchar(50) NOT NULL,
   PRIMARY KEY (payment_id)
 );
+
 
 
 CREATE TABLE Admin (
@@ -71,8 +71,7 @@ CREATE TABLE routes (
   end_location varchar(255) NOT NULL,
   distance decimal NOT NULL,
   duration time NOT NULL,
-  PRIMARY KEY (route_id),
-  KEY AK (route_number)
+  PRIMARY KEY (route_id)
 );
 
 CREATE TABLE feedback (
@@ -84,6 +83,8 @@ CREATE TABLE feedback (
   feedback_rating int NOT NULL,
   PRIMARY KEY (feedback_id)
 );
+
+
 
 
 CREATE TABLE Appointments (
@@ -113,7 +114,6 @@ CREATE TABLE utility_bills (
 );
 
 
-
 CREATE TABLE complaint_resolution (
   resolution_id int NOT NULL auto_increment,
   complain_id int NOT NULL,
@@ -128,8 +128,7 @@ CREATE TABLE vehicles (
   vehicle_type varchar(255) NOT NULL,
   capacity int NOT NULL,
   status enum('active', 'inactive', 'maintenance') NOT NULL,
-  PRIMARY KEY (vehicle_id),
-  KEY AK (vehicle_number)
+  PRIMARY KEY (vehicle_id)
 );
 
 CREATE TABLE trips (

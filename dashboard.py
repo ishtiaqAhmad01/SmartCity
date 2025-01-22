@@ -11,8 +11,8 @@ class BaseDashboard(QMainWindow):
         self.setStyleSheet("background-color: #2C3E50;")
 
         # Main Layout
-        self.page_widgets = {}  # Store pages by label
-        self.sidebar_buttons = []  # Track sidebar buttons
+        self.page_widgets = {}  
+        self.sidebar_buttons = []  
         main_layout = QHBoxLayout()
 
         # Sidebar and content area
@@ -97,6 +97,6 @@ class BaseDashboard(QMainWindow):
     def logout(self):
         """Handle logout."""
         QMessageBox.information(self, "Logout", "You have been logged out successfully!")
-        self.close()
+        
 
 

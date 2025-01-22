@@ -1,7 +1,7 @@
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import Qt
 from page1_form import AddComplaintDialog
-from user_database import delete_complaint_from_db, insert_complain_to_db,load_complains_from_db, add_review_of_complain
+from database import delete_complaint_from_db, insert_complain_to_db,load_complains_from_db, add_review_of_complain
 from functions import table_style
 import globals
 from feedback import FeedbackDialog
@@ -9,13 +9,12 @@ from feedback import FeedbackDialog
 
 
 
-class Page1(QWidget):
+class UserComplainManagmnet(QWidget):
     def __init__(self):
         super().__init__()
         self.init_ui()
 
     def init_ui(self):
-        # Main layout for the page
         layout = QVBoxLayout()
         layout.setContentsMargins(10, 10, 10, 10)
 
@@ -129,7 +128,7 @@ class Page1(QWidget):
             if feedback_dialog.exec_() == QDialog.Accepted:
                 feedback, rating = feedback_dialog.get_feedback()
                 add_review_of_complain(complaint_id, feedback, rating)
-                delete_complaint_from_db(complaint_id) # also delete as we have provided feedback
+                #delete_complaint_from_db(complaint_id) # also delete as we have provided feedback
                 QMessageBox.information(self, "Success", "Your feedback has been submitted.")
         
         self.load_complaints()

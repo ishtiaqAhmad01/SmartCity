@@ -13,7 +13,7 @@ class AdminDashboard(BaseDashboard):
         super().__init__("User Dashboard")
         self.add_page("Bill Management", BillManagement())
         self.add_page("Public Transport Management", Admin_transport())
-        self.add_page("Bill Management", AdminAppointmentManagement())
+        self.add_page("Appointment Booking", AdminAppointmentManagement())
         self.add_page("Complain", AdminPage())
 
 

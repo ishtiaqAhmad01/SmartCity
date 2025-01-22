@@ -1,9 +1,9 @@
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import *
-from user_database import *
+from database import *
 from functions import *
-from user_database import add_admin_to_db
+from database import add_admin_to_db
 
 class Admin_SignUpPage(QWidget):
     def __init__(self):

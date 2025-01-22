@@ -15,7 +15,7 @@ def check_user_cnic_password(cnic, password): #Done
         query = "SELECT password_hash FROM USERS WHERE CNIC = %s"
         cursor.execute(query, (cnic,))
         result = cursor.fetchone()
-        print(result[0])
+        
         if result and result[0] == hash_password(password).decode('utf-8'):
             print("success")
             return True
@@ -260,7 +260,7 @@ def get_bill_info(cnic, bill_type):
     try:
         with connection.cursor() as cursor:
             query = """
-                select u.first_name, u.last_name, u.email, a.province, a.district, a.city, u.phone_number, b.tax_percentage, b.tax_amount, b.amount_before_due
+                select u.first_name, u.last_name, u.email, a.province, a.district, a.city, u.phone_number, b.tax_percentage, b.tax_amount, b.amount_before_due, b.late_fee, b.issue_date, b.due_date
                 from users  u
                 join utility_bills b on u.cnic = b.user_cnic
                 join address a on a.cnic = b.user_cnic
@@ -269,36 +269,120 @@ def get_bill_info(cnic, bill_type):
             cursor.execute(query, (cnic, bill_type))
             return cursor.fetchone()
     except Exception as e:
+        print(e)
         return 1
 
-def load_current_bills_data(cnic):
+def load_current_bills_data(cnic, status):
     try:
         with connection.cursor() as cursor:
             query = """
-                select bill_type, due_date, amount_before_due from utility_bills where user_cnic = %s
+                select bill_type, due_date, amount_before_due from utility_bills where user_cnic = %s and status = %s
             """
-            cursor.execute(query, (cnic, ))
+            cursor.execute(query, (cnic, status))
             return cursor.fetchall()
     except Exception as e:
         print(e)
         return None
 
-if __name__ == "__main__":
-    First_Name = 'ISHTIAQ'
-    Last_Name = 'AHMAD'
-    Phone = '03072928533'
-    Email = "s2023065078@umt.edu.pk"
-    cnic ='3660245605291'
-    Nationality = 'Pakistani'
-    Date_of_Birth = '2005/03/07'
-    Gender = 'Male'
-    Password = 'ahmad'
-    Province = 'Punjab'
-    District = 'Multan'
-    Tehsil = 'Multan City'
-    Picture = 'C:/Users/ISHTIAQ/Downloads/Ishtiaq (2).jpg'
-    print(get_bill_info(cnic, "Electric"))
+def load_pdf_bill(bill_id):
+    try:
+        with connection.cursor() as cursor:
+            query = """
+            select u.cnic, b.bill_type, b.issue_date, b.due_date, b.amount_before_due, b.tax_percentage, b.tax_amount, b.late_fee, b.amount_after_due
+            from users u join utility_bills b on u.cnic = b.user_cnic
+            where b.bill_id = %s 
+            """
+            cursor.execute(query, (bill_id))
+            return cursor.fetchall()
+    except Exception as e:
+        print(e)
+        return None
+
+def update_bill_status(cnic, bill_type):
+    try:
+        with connection.cursor() as cursor:
+            query = """
+                update utility_bills
+                set status = 'paid'
+                where user_cnic = %s and bill_type = %s
+            """
+            cursor.execute(query, (cnic, bill_type))
+            connection.commit()
+    except Exception as e:
+        print(e)
+
+def get_bill_id(cnic, bill_type):
+    try:
+        with connection.cursor() as cursor:
+            query = """
+                select bill_id from utility_bills
+                where user_cnic = %s and bill_type = %s
+            """
+            cursor.execute(query, (cnic, bill_type))
+            return cursor.fetchone()
+    except Exception as e:
+        print(e)
+        
+def insertPayment(bill_id, payment_amount):
+    try:
+        with connection.cursor() as cursor:
+            query = """
+                insert into payments(bill_id, payment_amount)
+                values(%s, %s)
+            """
+            cursor.execute(query, (bill_id, payment_amount))
+            connection.commit()
+    except Exception as e:
+        print(e)
+
+def get_feedback(refer_type, id):
+    try:
+        with connection.cursor() as cursor:
+            query = "select feedback_text, feedback_rating, feedback_date from feedback where refer_type = %s and refer_id = %s"
+            cursor.execute(query, (refer_type, id))
+            return cursor.fetchone()
+    except Exception as e:
+        print(e)
+        return ("NA",0,"NA")
     
+def get_comlpains():
+    try:
+        with connection.cursor() as cursor:
+            query = "select complain_id, sub_category, description, status from complains"
+            cursor.execute(query)
+            return cursor.fetchall()
+    except Exception as e:
+        print(e)
+        return ()
+
+def update_complain_status(complain_id):
+    try:
+        with connection.cursor() as cursor:
+            query = "update complains set status = 'resolved' where complain_id = %s"
+            cursor.execute(query, (complain_id, ))
+            connection.commit()
+    except Exception as e:
+        print(e)
+
+
+
+if __name__ == "__main__":
+    # First_Name = 'ISHTIAQ'
+    # Last_Name = 'AHMAD'
+    # Phone = '03072928533'
+    # Email = "s2023065078@umt.edu.pk"
+    cnic ='3660245605291'
+    # Nationality = 'Pakistani'
+    # Date_of_Birth = '2005/03/07'
+    # Gender = 'Male'
+    # Password = 'ahmad'
+    # Province = 'Punjab'
+    # District = 'Multan'
+    # Tehsil = 'Multan City'
+    # Picture = 'C:/Users/ISHTIAQ/Downloads/Ishtiaq (2).jpg'
+    # print(get_bill_info(cnic, "Electric"))
+    # print(get_bill_id(cnic, 'Electric'))
+    print(get_feedback('complain', 9))
 
 
 

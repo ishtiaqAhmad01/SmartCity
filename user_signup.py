@@ -1,9 +1,9 @@
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import *
-from user_database import *
+from database import *
 from functions import *
-from user_database import add_user_to_db
+from database import add_user_to_db
 import random
 import time
 

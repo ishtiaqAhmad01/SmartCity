@@ -6,7 +6,7 @@ from user_signup import User_SignUpPage
 from admin_signup import Admin_SignUpPage
 from user_dashboard import UserDashboard
 from admin_dashboard import AdminDashboard
-from user_database import check_user_cnic_password, check_admin_cnic_password
+from database import check_user_cnic_password, check_admin_cnic_password
 import globals
 
 class LoginPage(QWidget):

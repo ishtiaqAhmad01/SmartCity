@@ -5,7 +5,7 @@ from PyQt5.QtGui import QFont
 from page2_form import AddDocumentPopup
 from functions import *
 import globals
-from user_database import add_doc_to_database, load_doc_from_database, get_file_from_database, get_fileinfo_from_database
+from database import add_doc_to_database, load_doc_from_database, get_file_from_database, get_fileinfo_from_database
 
 class DigitalDocumentStorage(QWidget):
     def __init__(self):

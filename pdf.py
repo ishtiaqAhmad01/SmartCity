@@ -15,7 +15,7 @@ def generate_utility_bill_pdf(path, bill_info):
     # Utility Provider Information
     c.setFont("Helvetica", 12)
     c.setFillColor(colors.black)
-    c.drawString(50, height - 120, "Issued by: Unified City Service Platform")
+    c.drawString(50, height - 120, "Issued by: Unified City Service Provider")
 
     # User Information
     c.setFont("Helvetica-Bold", 14)
@@ -69,3 +69,19 @@ def generate_utility_bill_pdf(path, bill_info):
     c.save()
     print(f"Utility bill saved to: {path}")
 
+
+if __name__ == "__main__":
+    bill_info_example = {
+        "user_cnic": "12345-6789012-3",
+        "bill_type": "Electricity",
+        "issue_date": "2025-01-01",
+        "due_date": "2025-01-15",
+        "amount_before_due": 5000.00,
+        "tax_percentage": 10, 
+        "tax_amount": 500.00, 
+        "late_fee": 550.00,   
+        "amount_after_due": 6050.00  
+    }
+
+
+    generate_utility_bill_pdf("utility_bill_updated.pdf", bill_info_example)
