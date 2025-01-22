@@ -380,10 +380,10 @@ def get_appointmnets(cnic):
     try:
         with connection.cursor() as cursor:
             query = """
-            select * from Appointments where user_cnic = %s
+            select service,  location, booking_date, time, status from Appointments where user_cnic = %s
             """
-            cursor.execute(query, (cnic,))
-            cursor.fetchall()
+            cursor.execute(query, (cnic))
+            return cursor.fetchall()
     except Exception as e:
         print(e)
         return ()

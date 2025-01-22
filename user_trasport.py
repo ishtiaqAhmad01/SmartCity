@@ -8,17 +8,15 @@ class PublicTransportBooking(QWidget):
         self.init_ui()
 
     def init_ui(self):
-        # Main layout
         layout = QVBoxLayout()
         layout.setContentsMargins(10, 10, 10, 10)
 
-        # Header
+
         header = QLabel("Public Transport Booking")
         header.setAlignment(Qt.AlignCenter)
         header.setStyleSheet("font-size: 24px; font-weight: bold; color: white;")
         layout.addWidget(header)
 
-        # Tabs for Route Search and Booking History
         self.tab_widget = QTabWidget()
         self.tab_widget.setStyleSheet(tab_style())
         
@@ -29,14 +27,13 @@ class PublicTransportBooking(QWidget):
         self.setLayout(layout)
 
     def init_route_search_tab(self):
-        """Initialize the Route Search tab."""
         search_tab = QWidget()
         layout = QVBoxLayout(search_tab)
 
-        # Search Form
+
         search_layout = QHBoxLayout()
 
-        # Source Input
+
         source_label = QLabel("Source:")
         source_label.setStyleSheet("font-size: 14px; font-weight: bold; color: white;")
         search_layout.addWidget(source_label)
@@ -45,7 +42,6 @@ class PublicTransportBooking(QWidget):
         self.source_input.setPlaceholderText("Enter source location")
         search_layout.addWidget(self.source_input)
 
-        # Destination Input
         dest_label = QLabel("Destination:")
         dest_label.setStyleSheet("font-size: 14px; font-weight: bold; color: white;")
         search_layout.addWidget(dest_label)
@@ -83,7 +79,6 @@ class PublicTransportBooking(QWidget):
 
         layout.addLayout(search_layout)
 
-        # Table for Available Routes
         self.route_table = QTableWidget()
         self.route_table.setColumnCount(5)
         self.route_table.setHorizontalHeaderLabels(["Route", "Date", "Time", "Fare", "Actions"])
@@ -91,21 +86,18 @@ class PublicTransportBooking(QWidget):
         self.route_table.setStyleSheet(table_style())
         layout.addWidget(self.route_table)
 
-        # Add Route Search tab to the tab widget
-        self.tab_widget.addTab(search_tab, "Route Search")  # Title of the tab
+        self.tab_widget.addTab(search_tab, "Route Search")  
 
     def init_booking_history_tab(self):
-        """Initialize the Booking History tab."""
         history_tab = QWidget()
         layout = QVBoxLayout(history_tab)
 
-        # Header for Booking History
+
         history_label = QLabel("Booking History")
         history_label.setAlignment(Qt.AlignCenter)
         history_label.setStyleSheet("font-size: 18px; font-weight: bold; color: white;")
         layout.addWidget(history_label)
 
-        # Table for Booking History
         self.history_table = QTableWidget()
         self.history_table.setColumnCount(6)
         self.history_table.setHorizontalHeaderLabels(["Route", "Date", "Time", "Fare", "Status", "Actions"])
@@ -113,7 +105,7 @@ class PublicTransportBooking(QWidget):
         self.history_table.setStyleSheet(table_style())
         layout.addWidget(self.history_table)
 
-        # Refresh Button
+
         refresh_button = QPushButton("Refresh Bookings")
         refresh_button.setStyleSheet("""
             QPushButton {
@@ -130,8 +122,7 @@ class PublicTransportBooking(QWidget):
         refresh_button.clicked.connect(self.refresh_bookings)
         layout.addWidget(refresh_button)
 
-        # Add Booking History tab to the tab widget
-        self.tab_widget.addTab(history_tab, "Booking History")  # Title of the tab
+        self.tab_widget.addTab(history_tab, "Booking History") 
 
     def search_routes(self):
         """Search for available routes."""
@@ -143,17 +134,14 @@ class PublicTransportBooking(QWidget):
             QMessageBox.warning(self, "Input Error", "Please provide both source and destination.")
             return
 
-        # Example data (replace with actual database query)
         routes = [
-            {"route": f"{source} to {destination}", "date": travel_date, "time": "10:00 AM", "fare": "$15"},
-            {"route": f"{source} to {destination}", "date": travel_date, "time": "3:00 PM", "fare": "$20"},
+            {"route": f"{source} to {destination}", "date": travel_date, "time": "10:00 AM", "fare": ""},
+            {"route": f"{source} to {destination}", "date": travel_date, "time": "3:00 PM", "fare": ""},
         ]
 
         self.populate_table(self.route_table, routes, "Book")
 
     def refresh_bookings(self):
-        """Refresh the booking history table."""
-        # Example data (replace with actual database query)
         bookings = [
             {"route": "City A to City B", "date": "2025-01-10", "time": "10:00 AM", "fare": "$15", "status": "Confirmed"},
             {"route": "City B to City A", "date": "2025-01-15", "time": "3:00 PM", "fare": "$20", "status": "Cancelled"},
@@ -162,13 +150,11 @@ class PublicTransportBooking(QWidget):
         self.populate_table(self.history_table, bookings, "Cancel/Reschedule")
 
     def populate_table(self, table, data, action_text):
-        """Populate the table with data and add actions."""
         table.setRowCount(len(data))
         for row, item in enumerate(data):
             for col, key in enumerate(["route", "date", "time", "fare", "status"]):
                 table.setItem(row, col, QTableWidgetItem(item.get(key, "")))
 
-            # Add Action Button
             action_button = QPushButton(action_text)
             action_button.setStyleSheet("""
                 QPushButton {
@@ -186,7 +172,6 @@ class PublicTransportBooking(QWidget):
             table.setCellWidget(row, len(data[0]), action_button)
 
     def handle_action(self, row):
-        """Handle actions like booking or canceling."""
         QMessageBox.information(self, "Action", f"Action triggered for row {row}.")
 
 

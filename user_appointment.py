@@ -137,21 +137,22 @@ class AppointmentBooking(QWidget):
         if not data:
             self.history_table.setRowCount(0)
             return
-
+        
+        # service,  location, date, time, status
         self.history_table.setRowCount(len(data))
         for row, appointment in enumerate(data):
-            self.history_table.setItem(row, 0, QTableWidgetItem(appointment["service"]))
-            self.history_table.setItem(row, 1, QTableWidgetItem(appointment["location"]))
-            self.history_table.setItem(row, 2, QTableWidgetItem(appointment["date"]))
-            self.history_table.setItem(row, 3, QTableWidgetItem(appointment["time"]))
-            self.history_table.setItem(row, 4, QTableWidgetItem(appointment["status"]))
+            self.history_table.setItem(row, 0, QTableWidgetItem(appointment[0]))
+            self.history_table.setItem(row, 1, QTableWidgetItem(appointment[1]))
+            self.history_table.setItem(row, 2, QTableWidgetItem(str(appointment[2])))
+            self.history_table.setItem(row, 3, QTableWidgetItem(str(appointment[3])))
+            self.history_table.setItem(row, 4, QTableWidgetItem(appointment[4]))
 
-            # Add action buttons
+            
             actions_widget = QWidget()
             actions_layout = QHBoxLayout(actions_widget)
             actions_layout.setContentsMargins(0, 0, 0, 0)
 
-            if appointment["status"] == "Upcoming":
+            if appointment[4] == "Upcoming":
                 cancel_button = QPushButton("Cancel")
                 cancel_button.clicked.connect(lambda _, r=row: self.cancel_appointment(r))
                 actions_layout.addWidget(cancel_button)
@@ -159,7 +160,7 @@ class AppointmentBooking(QWidget):
                 reschedule_button = QPushButton("Reschedule")
                 reschedule_button.clicked.connect(lambda _, r=row: self.reschedule_appointment(r))
                 actions_layout.addWidget(reschedule_button)
-            elif appointment["status"] == "Completed":
+            elif appointment[4] == "Completed":
                 feedback_button = QPushButton("Feedback")
                 feedback_button.clicked.connect(lambda _, r=row: self.leave_feedback(r))
                 actions_layout.addWidget(feedback_button)
@@ -168,19 +169,13 @@ class AppointmentBooking(QWidget):
             self.history_table.setCellWidget(row, 5, actions_widget)
 
     def cancel_appointment(self, row):
-        """Cancel an appointment (Placeholder function)."""
-        print(f"Cancelling appointment at row {row}")
-        pass  # Implement MySQL UPDATE logic to mark as canceled
+        pass  
 
     def reschedule_appointment(self, row):
-        """Reschedule an appointment (Placeholder function)."""
-        print(f"Rescheduling appointment at row {row}")
-        pass  # Implement MySQL UPDATE logic to reschedule
+        pass
 
     def leave_feedback(self, row):
-        """Leave feedback for an appointment (Placeholder function)."""
-        print(f"Leaving feedback for appointment at row {row}")
-        pass  # Implement MySQL INSERT/UPDATE logic for feedback
+        pass 
 
 
 if __name__ == "__main__":

@@ -96,6 +96,7 @@ CREATE TABLE Appointments (
   FOREIGN KEY (user_cnic) REFERENCES users(CNIC)
 ); 
 
+
 select * from Appointments where user_cnic = '3660245605291'
 
 

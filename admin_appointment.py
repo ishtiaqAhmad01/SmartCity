@@ -8,21 +8,17 @@ class AdminAppointmentManagement(QWidget):
         self.init_ui()
 
     def init_ui(self):
-        # Main layout
         layout = QVBoxLayout()
         layout.setContentsMargins(10, 10, 10, 10)
 
-        # Header
         header = QLabel("Admin Panel - Appointment Management")
         header.setAlignment(Qt.AlignCenter)
         header.setStyleSheet("font-size: 24px; font-weight: bold; color: #333;")
         layout.addWidget(header)
 
-        # Tab Widget
         self.tab_widget = QTabWidget()
         self.tab_widget.setStyleSheet(tab_style())
 
-        # Initialize Tabs
         self.init_appointment_management_tab()
         self.init_appointment_history_tab()
         self.init_reports_tab()
@@ -31,7 +27,6 @@ class AdminAppointmentManagement(QWidget):
         self.setLayout(layout)
 
     def init_appointment_management_tab(self):
-        """Initialize the Appointment Management tab."""
         management_tab = QWidget()
         layout = QVBoxLayout(management_tab)
 
@@ -71,15 +66,12 @@ class AdminAppointmentManagement(QWidget):
         self.management_table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
         layout.addWidget(self.management_table)
 
-        # Add Manage Appointment tab to the tab widget
         self.tab_widget.addTab(management_tab, "Manage Appointments")
 
     def init_appointment_history_tab(self):
-        """Initialize the Appointment History tab."""
         history_tab = QWidget()
         layout = QVBoxLayout(history_tab)
 
-        # Table for Appointment History
         self.history_table = QTableWidget()
         self.history_table.setColumnCount(6)
         self.history_table.setStyleSheet(table_style())
@@ -87,35 +79,28 @@ class AdminAppointmentManagement(QWidget):
         self.history_table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
         layout.addWidget(self.history_table)
 
-        # Export History Button
         export_button = QPushButton("Export History")
         export_button.clicked.connect(self.export_history)
         layout.addWidget(export_button)
 
-        # Add Appointment History tab to the tab widget
         self.tab_widget.addTab(history_tab, "Appointment History")
 
     def init_reports_tab(self):
-        """Initialize the Reports tab."""
         reports_tab = QWidget()
         layout = QVBoxLayout(reports_tab)
 
-        # Total Appointments
         total_appointments_label = QLabel("Total Appointments: 0")
         total_appointments_label.setStyleSheet("font-size: 16px; font-weight: bold;")
         layout.addWidget(total_appointments_label)
 
-        # Revenue Generated
         revenue_label = QLabel("Total Revenue Generated: $0")
         revenue_label.setStyleSheet("font-size: 16px; font-weight: bold;")
         layout.addWidget(revenue_label)
 
-        # Feedback Statistics
         feedback_label = QLabel("Feedback Summary: Positive (0), Neutral (0), Negative (0)")
         feedback_label.setStyleSheet("font-size: 16px; font-weight: bold;")
         layout.addWidget(feedback_label)
 
-        # Most Popular Services
         popular_services_label = QLabel("Most Popular Services:")
         popular_services_label.setStyleSheet("font-size: 16px; font-weight: bold;")
         layout.addWidget(popular_services_label)
@@ -127,38 +112,20 @@ class AdminAppointmentManagement(QWidget):
         self.popular_services_table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
         layout.addWidget(self.popular_services_table)
 
-        # Generate Reports Button
         generate_reports_button = QPushButton("Generate Reports")
         generate_reports_button.clicked.connect(self.generate_reports)
         layout.addWidget(generate_reports_button)
 
-        # Add Reports tab to the tab widget
         self.tab_widget.addTab(reports_tab, "Reports")
 
     def filter_appointments(self):
-        """Filter appointments based on selected criteria."""
-        print("Applying filters...")
-        pass  # Implement filtering logic
+        pass
 
     def sort_appointments(self):
-        """Sort appointments by date or time."""
-        print("Sorting appointments...")
-        pass  # Implement sorting logic
+        pass 
 
     def export_history(self):
-        """Export appointment history to a file."""
-        print("Exporting history...")
-        pass  # Implement export logic
+        pass 
 
     def generate_reports(self):
-        """Generate and display reports."""
-        print("Generating reports...")
-        pass  # Implement report generation logic
-
-if __name__ == "__main__":
-    import sys
-    app = QApplication(sys.argv)
-    admin_window = AdminAppointmentManagement()
-    admin_window.setStyleSheet("background-color: #FFFFFF; color: #333;")
-    admin_window.show()
-    sys.exit(app.exec_())
+        pass
