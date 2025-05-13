@@ -406,7 +406,12 @@ if __name__ == "__main__":
     # print(get_bill_info(cnic, "Electric"))
     # print(get_bill_id(cnic, 'Electric'))
     # print(get_feedback('complain', 9))
-    print(get_appointmnets('3660245605291'))
+    while True:
+        p = input()
+        if check_user_cnic_password(cnic, p):
+            print("Done")
+        else:
+            print("Not")
 
 
 

@@ -168,13 +168,13 @@ class AppointmentBooking(QWidget):
             actions_widget.setLayout(actions_layout)
             self.history_table.setCellWidget(row, 5, actions_widget)
 
-    def cancel_appointment(self, row):
+    def cancel_appointment(self, row):  # TBI
         pass  
 
-    def reschedule_appointment(self, row):
+    def reschedule_appointment(self, row):  # TBI
         pass
 
-    def leave_feedback(self, row):
+    def leave_feedback(self, row):  # TBI
         pass 
 
 

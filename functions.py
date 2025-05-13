@@ -108,8 +108,8 @@ def spin_box_style():
 
 def send_bill_email(to_email, pdf_path, bill_info):
     # Email credentials
-    sender_email = "unifiedcityservicesplatform@gmail.com"
-    sender_password = "bajogglnmhmxpljy"
+    sender_email = "" #Eamil......................
+    sender_password = "" # password........................
 
     # Email subject and body
     subject = f"Utility Bill for {bill_info['bill_type']} - Due {bill_info['due_date']}"
@@ -175,8 +175,8 @@ def send_email(to_email, otp):
     """
     import os
 
-    sender_email = "unifiedcityservicesplatform@gmail.com"
-    sender_password = "bajogglnmhmxpljy"
+    sender_email = "unifiedcityservicesplatform@gmail.com"  # Email
+    sender_password = "bajogglnmhmxpljy" # Paswword
 
     subject = "Verification Code"
     html_content = f"""
@@ -207,7 +207,7 @@ def send_email(to_email, otp):
         </html>
     """
 
-    # Creating the email message
+
     msg = MIMEMultipart()
     msg['From'] = sender_email
     msg['To'] = to_email
